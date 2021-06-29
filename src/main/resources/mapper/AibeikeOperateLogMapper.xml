@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yf.dao.AibeikeOperateLogMapper">
+  <resultMap id="BaseResultMap" type="com.yf.model.AibeikeOperateLog">
+    <constructor>
+      <idArg column="id" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <arg column="aibeike_media_id" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="aibeike_media_type" javaType="java.lang.Byte" jdbcType="TINYINT" />
+      <arg column="courseware_onshelf_id" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <arg column="courseware_reference_id" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <arg column="user_id" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <arg column="user_type" javaType="java.lang.Byte" jdbcType="TINYINT" />
+      <arg column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="source" javaType="java.lang.Byte" jdbcType="TINYINT" />
+      <arg column="version" javaType="java.lang.Byte" jdbcType="TINYINT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, aibeike_media_id, aibeike_media_type, courseware_onshelf_id, courseware_reference_id, 
+    user_id, user_type, create_time, source, version
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_aibeike_operate_log
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_aibeike_operate_log
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.yf.model.AibeikeOperateLog">
+    insert into t_aibeike_operate_log (id, aibeike_media_id, aibeike_media_type, 
+      courseware_onshelf_id, courseware_reference_id, 
+      user_id, user_type, create_time, 
+      source, version)
+    values (#{id,jdbcType=BIGINT}, #{aibeikeMediaId,jdbcType=VARCHAR}, #{aibeikeMediaType,jdbcType=TINYINT}, 
+      #{coursewareOnshelfId,jdbcType=BIGINT}, #{coursewareReferenceId,jdbcType=BIGINT}, 
+      #{userId,jdbcType=BIGINT}, #{userType,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{source,jdbcType=TINYINT}, #{version,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.yf.model.AibeikeOperateLog">
+    insert into t_aibeike_operate_log
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="aibeikeMediaId != null">
+        aibeike_media_id,
+      </if>
+      <if test="aibeikeMediaType != null">
+        aibeike_media_type,
+      </if>
+      <if test="coursewareOnshelfId != null">
+        courseware_onshelf_id,
+      </if>
+      <if test="coursewareReferenceId != null">
+        courseware_reference_id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="userType != null">
+        user_type,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="source != null">
+        source,
+      </if>
+      <if test="version != null">
+        version,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="aibeikeMediaId != null">
+        #{aibeikeMediaId,jdbcType=VARCHAR},
+      </if>
+      <if test="aibeikeMediaType != null">
+        #{aibeikeMediaType,jdbcType=TINYINT},
+      </if>
+      <if test="coursewareOnshelfId != null">
+        #{coursewareOnshelfId,jdbcType=BIGINT},
+      </if>
+      <if test="coursewareReferenceId != null">
+        #{coursewareReferenceId,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="userType != null">
+        #{userType,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="source != null">
+        #{source,jdbcType=TINYINT},
+      </if>
+      <if test="version != null">
+        #{version,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yf.model.AibeikeOperateLog">
+    update t_aibeike_operate_log
+    <set>
+      <if test="aibeikeMediaId != null">
+        aibeike_media_id = #{aibeikeMediaId,jdbcType=VARCHAR},
+      </if>
+      <if test="aibeikeMediaType != null">
+        aibeike_media_type = #{aibeikeMediaType,jdbcType=TINYINT},
+      </if>
+      <if test="coursewareOnshelfId != null">
+        courseware_onshelf_id = #{coursewareOnshelfId,jdbcType=BIGINT},
+      </if>
+      <if test="coursewareReferenceId != null">
+        courseware_reference_id = #{coursewareReferenceId,jdbcType=BIGINT},
+      </if>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="userType != null">
+        user_type = #{userType,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="source != null">
+        source = #{source,jdbcType=TINYINT},
+      </if>
+      <if test="version != null">
+        version = #{version,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.yf.model.AibeikeOperateLog">
+    update t_aibeike_operate_log
+    set aibeike_media_id = #{aibeikeMediaId,jdbcType=VARCHAR},
+      aibeike_media_type = #{aibeikeMediaType,jdbcType=TINYINT},
+      courseware_onshelf_id = #{coursewareOnshelfId,jdbcType=BIGINT},
+      courseware_reference_id = #{coursewareReferenceId,jdbcType=BIGINT},
+      user_id = #{userId,jdbcType=BIGINT},
+      user_type = #{userType,jdbcType=TINYINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      source = #{source,jdbcType=TINYINT},
+      version = #{version,jdbcType=TINYINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

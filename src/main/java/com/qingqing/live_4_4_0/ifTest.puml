@@ -1,0 +1,18 @@
+@startuml
+title 从课件、作业中添加试题到错题本
+前端 -> notesvc:通过 资源id、paper_id、element_id保存题目
+note right: 资源id(courseware_reference_id、homework_id)
+notesvc -> api_or_live: 资源id透传
+api_or_live -> api_or_live:资源访问权限校验
+api_or_live -> notesvc: 校验结果返回
+
+notesvc -> quiz: 根据paper_id、element_id 查询试题信息(同步接口)
+quiz -> courseware_trcloud : 代理到教研云获取题目内容
+courseware_trcloud ->  quiz: 返回教研云获取题目内容
+quiz -> quiz: 触发异步上传文件到公有云(optional)
+quiz -> notesvc: 返回quiz_id, uniq_quiz_id
+note right: uniq_quiz_id:去掉element_id之后的记录id, quiz_id:包含element_id的记录id
+notesvc -> notesvc : 内部实现去重及持久化逻辑
+notesvc -> 前端: 返回成功
+@enduml
+

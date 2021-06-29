@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yf.dao.ElectronicTextbookMapper">
+  <resultMap id="BaseResultMap" type="com.yf.model.ElectronicTextbook">
+    <constructor>
+      <idArg column="id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="name" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="grade_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="study_section_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="subject_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="textbook_version_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="status" javaType="java.lang.Byte" jdbcType="TINYINT" />
+      <arg column="delete_status" javaType="java.lang.Byte" jdbcType="TINYINT" />
+      <arg column="picture_img_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="pdf_media_id" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="external_url" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="create_user_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="create_user_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="update_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="update_user_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="update_user_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, name, grade_id, study_section_id, subject_id, textbook_version_id, status, delete_status, 
+    picture_img_id, pdf_media_id, external_url, create_time, create_user_id, create_user_name, 
+    update_time, update_user_id, update_user_name
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_electronic_textbook
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from t_electronic_textbook
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.yf.model.ElectronicTextbook">
+    insert into t_electronic_textbook (id, name, grade_id, 
+      study_section_id, subject_id, textbook_version_id, 
+      status, delete_status, picture_img_id, 
+      pdf_media_id, external_url, create_time, 
+      create_user_id, create_user_name, update_time, 
+      update_user_id, update_user_name)
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{gradeId,jdbcType=INTEGER}, 
+      #{studySectionId,jdbcType=INTEGER}, #{subjectId,jdbcType=INTEGER}, #{textbookVersionId,jdbcType=INTEGER}, 
+      #{status,jdbcType=TINYINT}, #{deleteStatus,jdbcType=TINYINT}, #{pictureImgId,jdbcType=INTEGER}, 
+      #{pdfMediaId,jdbcType=VARCHAR}, #{externalUrl,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{createUserId,jdbcType=INTEGER}, #{createUserName,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP}, 
+      #{updateUserId,jdbcType=INTEGER}, #{updateUserName,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.yf.model.ElectronicTextbook">
+    insert into t_electronic_textbook
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="gradeId != null">
+        grade_id,
+      </if>
+      <if test="studySectionId != null">
+        study_section_id,
+      </if>
+      <if test="subjectId != null">
+        subject_id,
+      </if>
+      <if test="textbookVersionId != null">
+        textbook_version_id,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="deleteStatus != null">
+        delete_status,
+      </if>
+      <if test="pictureImgId != null">
+        picture_img_id,
+      </if>
+      <if test="pdfMediaId != null">
+        pdf_media_id,
+      </if>
+      <if test="externalUrl != null">
+        external_url,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="createUserId != null">
+        create_user_id,
+      </if>
+      <if test="createUserName != null">
+        create_user_name,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="updateUserId != null">
+        update_user_id,
+      </if>
+      <if test="updateUserName != null">
+        update_user_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="gradeId != null">
+        #{gradeId,jdbcType=INTEGER},
+      </if>
+      <if test="studySectionId != null">
+        #{studySectionId,jdbcType=INTEGER},
+      </if>
+      <if test="subjectId != null">
+        #{subjectId,jdbcType=INTEGER},
+      </if>
+      <if test="textbookVersionId != null">
+        #{textbookVersionId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="deleteStatus != null">
+        #{deleteStatus,jdbcType=TINYINT},
+      </if>
+      <if test="pictureImgId != null">
+        #{pictureImgId,jdbcType=INTEGER},
+      </if>
+      <if test="pdfMediaId != null">
+        #{pdfMediaId,jdbcType=VARCHAR},
+      </if>
+      <if test="externalUrl != null">
+        #{externalUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createUserId != null">
+        #{createUserId,jdbcType=INTEGER},
+      </if>
+      <if test="createUserName != null">
+        #{createUserName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateUserId != null">
+        #{updateUserId,jdbcType=INTEGER},
+      </if>
+      <if test="updateUserName != null">
+        #{updateUserName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yf.model.ElectronicTextbook">
+    update t_electronic_textbook
+    <set>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="gradeId != null">
+        grade_id = #{gradeId,jdbcType=INTEGER},
+      </if>
+      <if test="studySectionId != null">
+        study_section_id = #{studySectionId,jdbcType=INTEGER},
+      </if>
+      <if test="subjectId != null">
+        subject_id = #{subjectId,jdbcType=INTEGER},
+      </if>
+      <if test="textbookVersionId != null">
+        textbook_version_id = #{textbookVersionId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="deleteStatus != null">
+        delete_status = #{deleteStatus,jdbcType=TINYINT},
+      </if>
+      <if test="pictureImgId != null">
+        picture_img_id = #{pictureImgId,jdbcType=INTEGER},
+      </if>
+      <if test="pdfMediaId != null">
+        pdf_media_id = #{pdfMediaId,jdbcType=VARCHAR},
+      </if>
+      <if test="externalUrl != null">
+        external_url = #{externalUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createUserId != null">
+        create_user_id = #{createUserId,jdbcType=INTEGER},
+      </if>
+      <if test="createUserName != null">
+        create_user_name = #{createUserName,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateUserId != null">
+        update_user_id = #{updateUserId,jdbcType=INTEGER},
+      </if>
+      <if test="updateUserName != null">
+        update_user_name = #{updateUserName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.yf.model.ElectronicTextbook">
+    update t_electronic_textbook
+    set name = #{name,jdbcType=VARCHAR},
+      grade_id = #{gradeId,jdbcType=INTEGER},
+      study_section_id = #{studySectionId,jdbcType=INTEGER},
+      subject_id = #{subjectId,jdbcType=INTEGER},
+      textbook_version_id = #{textbookVersionId,jdbcType=INTEGER},
+      status = #{status,jdbcType=TINYINT},
+      delete_status = #{deleteStatus,jdbcType=TINYINT},
+      picture_img_id = #{pictureImgId,jdbcType=INTEGER},
+      pdf_media_id = #{pdfMediaId,jdbcType=VARCHAR},
+      external_url = #{externalUrl,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      create_user_id = #{createUserId,jdbcType=INTEGER},
+      create_user_name = #{createUserName,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      update_user_id = #{updateUserId,jdbcType=INTEGER},
+      update_user_name = #{updateUserName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

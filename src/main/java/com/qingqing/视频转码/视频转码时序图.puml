@@ -1,0 +1,35 @@
+@startuml
+autonumber
+title 阿里云视频转码时序图
+H5 -> Livesvc: 获取上传视频Sign,传入：storage_source
+Livesvc -> Imgsvc: 根据 storage_source 申请 公有云Sign
+Imgsvc -> Livesvc: 返回 申请到的公有云Sign
+Livesvc -> H5: 返回 申请到的公有云Sign
+H5 -> H5: 客户端根据自己申请的Sign上传相应的公有云
+H5 -> H5: 客户端自己重试逻辑
+H5 -> H5: 如果上传失败，请重试使用其他云
+H5 -> Livesvc: 上传公有云完成后,调用上传完成确认接口，传入：storage_source
+Livesvc -> Imgsvc: 插入 t_media、t_video、t_video_encode_result
+Imgsvc -> Livesvc: 返回加密的 media_id
+Livesvc -> H5: 返回加密的 media_id
+H5 -> Livesvc: 上传完成，将课件写入课件库 调用 upload_finish
+Livesvc -> Coursewaresvc:插入 repository、reference、courseware_encode_result
+Coursewaresvc -> Dessvc:触发视频转码，发送MQ消息到Dessvc
+Dessvc -> Dessvc: 处理MQ消息,插入 t_media_encode_task
+Dessvc -> Imgsvc: 处理任务，调用Imgsvc接口，处理转码逻辑
+Imgsvc -> Imgsvc: 根据 video表 的 storage_source字段,选择阿里云或者腾讯云视频转码
+Imgsvc -> Imgsvc: 收到阿里云回调，修改 t_media、t_ video、t_video_encode_result
+Imgsvc -> Dessvc: 视频转码结束,发送MQ消息到Dessvc
+Dessvc -> Dessvc: 修改 t_media_encode_task
+Dessvc -> Coursewaresvc: 视频课件转码结束,发送MQ消息消息到 Coursewaresvc
+Coursewaresvc -> Coursewaresvc: 修改 t_courseware_encode_result
+Coursewaresvc -> Livesvc:多媒体转码任务完成
+
+H5 -> Livesvc: 获取视频课件播放防盗链
+Livesvc -> Playsvc: 生成视频防盗链
+Playsvc -> Livesvc: 返回视频防盗链
+Livesvc -> H5: 返回视频防盗链
+H5 -> Playsvc:  获取视频课件播放地址
+Playsvc -> H5: 返回视频播放地址
+note right:Playsvc/api/pb/v2/play_info/video
+@enduml

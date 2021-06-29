@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yf.dao.CoursewareJyAreaMapper">
+  <resultMap id="BaseResultMap" type="com.yf.model.CoursewareJyArea">
+    <constructor>
+      <idArg column="id" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <arg column="courseware_onshelf_id" javaType="java.lang.Long" jdbcType="BIGINT" />
+      <arg column="jy_area_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="last_update_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="is_deleted" javaType="java.lang.Byte" jdbcType="TINYINT" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, courseware_onshelf_id, jy_area_id, create_time, last_update_time, is_deleted
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_courseware_jy_area
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_courseware_jy_area
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.yf.model.CoursewareJyArea">
+    insert into t_courseware_jy_area (id, courseware_onshelf_id, jy_area_id, 
+      create_time, last_update_time, is_deleted
+      )
+    values (#{id,jdbcType=BIGINT}, #{coursewareOnshelfId,jdbcType=BIGINT}, #{jyAreaId,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP}, #{isDeleted,jdbcType=TINYINT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.yf.model.CoursewareJyArea">
+    insert into t_courseware_jy_area
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="coursewareOnshelfId != null">
+        courseware_onshelf_id,
+      </if>
+      <if test="jyAreaId != null">
+        jy_area_id,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="lastUpdateTime != null">
+        last_update_time,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="coursewareOnshelfId != null">
+        #{coursewareOnshelfId,jdbcType=BIGINT},
+      </if>
+      <if test="jyAreaId != null">
+        #{jyAreaId,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateTime != null">
+        #{lastUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yf.model.CoursewareJyArea">
+    update t_courseware_jy_area
+    <set>
+      <if test="coursewareOnshelfId != null">
+        courseware_onshelf_id = #{coursewareOnshelfId,jdbcType=BIGINT},
+      </if>
+      <if test="jyAreaId != null">
+        jy_area_id = #{jyAreaId,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateTime != null">
+        last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.yf.model.CoursewareJyArea">
+    update t_courseware_jy_area
+    set courseware_onshelf_id = #{coursewareOnshelfId,jdbcType=BIGINT},
+      jy_area_id = #{jyAreaId,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP},
+      is_deleted = #{isDeleted,jdbcType=TINYINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

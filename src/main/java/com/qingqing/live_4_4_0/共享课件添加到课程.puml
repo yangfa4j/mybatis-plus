@@ -1,0 +1,17 @@
+@startuml activity-19
+|liveteachsvc|
+start
+#HotPink:通过 onshelf_id HTTP调用coursewaresvc服务 -> (根据上架ID查询课件上架信息详情接口) courseware/onshelf/find_by_id ;
+|liveteachsvc|
+        :校验共享课件详情信息，校验逻辑如下
+是否存在、是否有已下架属性(on_shelf_status=2)、是否已经添加（查询 t_courseware_reference表）;
+if(是否校验通过) then (是)
+:提取信息，插入一条记录到 t_courseware_reference 表;
+:通过 courseware_id 查 t_courseware_reference 表，找到老师要绑定到课程的课件引用信息;
+:拿到 t_courseware_reference id 把课件加入到课程，插入一条数据到 t_live_order_course_courseware表;
+#HotPink: HTTP调用 livesvc服务 -> (PI 将reference_id 记录和课程绑定) ack_using_courseware;
+stop
+else (否)
+:抛异常;
+stop
+@enduml

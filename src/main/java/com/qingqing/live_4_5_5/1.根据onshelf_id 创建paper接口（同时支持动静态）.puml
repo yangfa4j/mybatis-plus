@@ -1,0 +1,15 @@
+@startuml
+autonumber
+title 根据 onshelf_id 创建paper接口（同时支持动静态）
+H5 -> liveteaching: 通过 onshelf_id 创建动态课件
+note right:动态课件会规定教研云的回调接口，带上 onshelf_id
+H5 -> liveteaching: 通过 onshelf_id 创建静态课件
+note right:静态课件H5缓存 onshelf_id
+liveteaching -> courseware: 代理: PI 根据onshelf_id 创建paper接口（同时支持动静态）
+courseware -> courseware: 根据不同的courseware_type 走不同的逻辑
+courseware -> 教研云:动态课件调用 /api/pi/v2/courseware/repo/copy_trm_cloud_courseware
+courseware -> 教研云:静态课件调用 /api/pi/v1/courseware/repo/copy_trm_cloud_static_courseware
+courseware <-- 教研云: 返回新生成的 paper_id,edit_url
+courseware --> liveteaching: 返回新生成的 paper_id,edit_url
+liveteaching --> H5: 在返回的 edit_url中，用户编辑课件
+@enduml

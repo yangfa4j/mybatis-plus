@@ -1,0 +1,28 @@
+// 4.4.5  缩略图完成汇报
+message LiveDessvcThumbnailTaskFinishedRequest {
+    optional int32 task_id = 1;
+    optional bool is_success = 2;
+    optional int32 error_code = 3;
+    optional string error_msg = 4;
+    repeated LiveDessvcThumbnailImageInfo thumbnail_image_infos = 5;
+}
+
+message LiveDessvcThumbnailImageInfo {
+    optional string image_id = 1;
+    optional int32 page_id = 2;
+}
+
+// 调用h5的请求
+message LiveDessvcThumbnailTaskRequest {
+    optional int64 task_id = 1; // 缩略图任务ID
+    optional int32 courseware_tpye = 2; // 课件类型
+    oneof preview_id {
+        int64 onshelf_id = 101; // 共享ID
+        int64 reference_id = 102; // 引用ID
+    }
+}
+
+
+
+
+
