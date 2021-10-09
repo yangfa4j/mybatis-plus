@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class},
-        scanBasePackages = {"com.yf", "com.test"})
+        scanBasePackages = {"com.yf", "com.test","com.ctrip"})
 public class MybatisPlusApplication {
 
     public static void main(String[] args) {

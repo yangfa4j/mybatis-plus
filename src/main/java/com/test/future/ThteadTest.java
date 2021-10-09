@@ -4,9 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -20,45 +17,50 @@ import java.util.function.Supplier;
 @Slf4j
 public class ThteadTest {
     public static void main(String[] args) throws Exception {
+//        ExecutorService executorService = Executors.newSingleThreadExecutor();
+//
+//        // 可以返回结果
+//        Callable<String> callable = new Callable<String>() {
+//            @Override
+//            public String call() throws Exception {
+//                log.info(" 进入callable 的 call 方法 ");
+//                TimeUnit.SECONDS.sleep(5);
+//                return "callable 执行完毕";
+//            }
+//        };
+//
+//        log.info("提交 callable 到线程池");
+//        Future<String> submit = executorService.submit(callable);
+//
+//        log.info("主线程继续执行");
+//
+//        log.info("主线程获取执行结果");
+//        while (!submit.isDone()) {
+//            log.info("task not done");
+//            TimeUnit.SECONDS.sleep(1);
+//        }
+//        String s = submit.get();
+//        log.info("callable执行结果是：{}", s);
+//        executorService.shutdown();
 
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
+//        threadTest();
 
-        Callable<String> callable = new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                log.info(" 进入callable 的 call 方法 ");
-                TimeUnit.SECONDS.sleep(5);
-                return "callable 执行完毕";
-            }
-        };
+        futureTest();
 
-        log.info("提交 callable 到线程池");
-        Future<String> submit = executorService.submit(callable);
-
-        log.info("主线程继续执行");
-
-        log.info("主线程获取执行结果");
-        while (!submit.isDone()) {
-            log.info("task not done");
-            TimeUnit.SECONDS.sleep(1);
-        }
-        String s = submit.get();
-        log.info("callable执行结果是：{}", s);
-        executorService.shutdown();
     }
 
     public static void threadTest() throws Exception {
         long start = System.currentTimeMillis();
 
         // 等凉菜 -- 必须要等待返回的结果，所以要调用join方法
-        Thread t1 = new ColdDishThread();
-        t1.start();
-        t1.join();
+        ColdDishThread coldDishThread = new ColdDishThread();
+        coldDishThread.start();
+        coldDishThread.join();
 
         // 等包子 -- 必须要等待返回的结果，所以要调用join方法
-        Thread t2 = new BumThread();
-        t2.start();
-        t2.join();
+        BumThread bumThread = new BumThread();
+        bumThread.start();
+        bumThread.join();
 
         long end = System.currentTimeMillis();
         System.out.println("准备完毕时间：" + (end - start));

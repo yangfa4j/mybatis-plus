@@ -5,9 +5,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * @Date 2021/4/23
  * @Author yangfa
- * @Description
+ * @Description 准备包子的线程，需要花费3秒钟
  */
-public class BumThread extends Thread{
+public class BumThread extends Thread {
     @Override
     public void run() {
         try {

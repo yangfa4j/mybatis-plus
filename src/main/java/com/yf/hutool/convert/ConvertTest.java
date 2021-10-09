@@ -45,7 +45,7 @@ public class ConvertTest {
         try {
             URL url = new URL("http://www.baidu.com");
             URLConnection urlConnection = url.openConnection();
-            HttpURLConnection connection = null;
+            HttpURLConnection connection;
             if (urlConnection instanceof HttpURLConnection) {
                 connection = (HttpURLConnection) urlConnection;
             } else {
@@ -54,10 +54,10 @@ public class ConvertTest {
             }
             // 获取返回的流
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String urlString = "";
+            StringBuilder urlString = new StringBuilder();
             String current;
             while ((current = in.readLine()) != null) {
-                urlString += current;
+                urlString.append(current);
             }
             System.out.println(urlString);
         } catch (IOException e) {
