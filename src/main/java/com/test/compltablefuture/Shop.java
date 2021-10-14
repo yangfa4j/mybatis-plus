@@ -3,13 +3,16 @@ package com.test.compltablefuture;
 import lombok.Data;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Data
 public class Shop {
 
     private String name;
 
-    private Random random = new Random();
+    public Shop(String name) {
+        this.name = name;
+    }
 
     /**
      * 根据产品名查找价格
@@ -25,22 +28,18 @@ public class Shop {
      * @return
      */
     private double calculatePrice(String product) {
-        delay();
-        return random.nextDouble() * product.charAt(0) + product.charAt(1);
+        sleep();
+        return new Random().nextDouble() * product.charAt(0) + product.charAt(1);
     }
 
     /**
-     * 通过睡眠模拟其他耗时操作
+     * 通过睡眠模拟其他耗时操作,IO 或者是 RPC调用
      */
-    private void delay() {
+    private void sleep() {
         try {
-            Thread.sleep(1000);
+            TimeUnit.SECONDS.sleep(2);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    public Shop(String name) {
-        this.name = name;
     }
 }
