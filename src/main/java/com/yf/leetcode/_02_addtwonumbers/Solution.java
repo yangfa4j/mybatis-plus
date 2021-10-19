@@ -8,11 +8,12 @@ package com.yf.leetcode._02_addtwonumbers;
  * <p>
  * 你可以假设除了数字 0 之外，这两个数都不会以 0 开头。
  * <p>
- * 来源：力扣（LeetCode） 链接：https://leetcode-cn.com/problems/add-two-numbers 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+ * 来源：力扣（LeetCode）两数相加
+ * 链接：https://leetcode-cn.com/problems/add-two-numbers
  */
 
 /**
- *   遍历链表，记住进位的数，carry，/ 与 % 的运用
+ * 遍历链表，记住进位的数，carry，/ 与 % 的运用
  */
 class Solution {
 
