@@ -18,6 +18,10 @@ class Solution {
 
     public static void main(String[] args) {
         new Solution().lengthOfLongestSubstring("abcabcbb");
+
+        new HashMap<String, String>(3){{
+            put("y","f");
+        }};
     }
 
     public int lengthOfLongestSubstring(String s) {
@@ -36,4 +40,6 @@ class Solution {
         }
         return max;
     }
+
+
 }

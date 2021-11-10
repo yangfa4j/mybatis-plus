@@ -19,7 +19,7 @@ public class 选择排序 {
             return array;
         }
         for (int i = 0; i < array.length; i++) {
-            // 从头到尾最小值的位置
+            // 最小值的位置
             int min = i;
             for (int j = i + 1; j < array.length; j++) {
                 // 循环一轮找到最小值的下标
@@ -27,12 +27,11 @@ public class 选择排序 {
                     min = j;
                 }
             }
-            // 下标不相等，可以交换
-            if (i != min) {
-                int temp = array[i];
-                array[i] = array[min];
-                array[min] = temp;
-            }
+            // swap
+            int temp = array[i];
+            array[i] = array[min];
+            array[min] = temp;
+
         }
         return array;
     }

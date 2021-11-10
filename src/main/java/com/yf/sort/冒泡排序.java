@@ -9,7 +9,7 @@ public class 冒泡排序 {
 
     public static void main(String[] args) {
         int[] arr = new int[]{4, 3, 1, 5, 7, 6};
-        for (int i = 0; i < 选择排序.sort(arr).length; i++) {
+        for (int i = 0; i < 冒泡排序.sort(arr).length; i++) {
             System.out.println(arr[i]);
         }
     }
@@ -19,12 +19,12 @@ public class 冒泡排序 {
         if (null == array || array.length < 2) {
             return array;
         }
-        int temp = 0;
         for (int i = 0; i < array.length; i++) {
             // -i 是因为比较的数每一次循环都在变少
             for (int j = 0; j < array.length - i; j++) {
                 if (array[j] > array[j + 1]) {
-                    temp = array[i];
+                    // swap
+                    int temp = array[i];
                     array[i] = array[j];
                     array[j] = temp;
                 }
