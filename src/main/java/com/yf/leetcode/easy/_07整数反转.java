@@ -57,14 +57,13 @@ class _07整数反转 {
     }
 
     public static int reverse(int x) {
-        long y = x;
         long result = 0;
         do {
             // % 取最后一位数
-            result = 10 * result + y % 10;
+            result = 10 * result + x % 10;
         }
         // / 丢弃最后一位数
-        while ((y /= 10) != 0);
+        while ((x /= 10) != 0);
         if (result < Integer.MIN_VALUE || result > Integer.MAX_VALUE) {
             return 0;
         }
