@@ -55,15 +55,20 @@ import java.util.Objects;
 class _09回文数 {
 
     public static void main(String[] args) {
-        System.out.println(_09回文数.isPalindrome(-1221));
+        System.out.println(_09回文数.isPalindrome(121));
 
     }
 
     public static boolean isPalindrome(int x) {
+        int y = x;
+        // 排除负数
+        if (x < 0) {
+            return Boolean.FALSE;
+        }
         int result = 0;
         do {
-            result = result * 10 + x % 10;
-        } while ((x /= 10) != 0);
+            result = result * 10 + y % 10;
+        } while ((y /= 10) != 0);
         return Objects.equals(result, x) ? Boolean.TRUE : Boolean.FALSE;
     }
 }
