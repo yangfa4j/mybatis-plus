@@ -55,9 +55,48 @@ package com.yf.leetcode.easy;
 // Related Topics 栈 字符串 
 // 👍 2765 👎 0
 
+// 遍历给定的字符串 ss，当遇到一个左括号时，期望在后续的遍历中，有一个相同类型的右括号将其闭合。
+// 由于后遇到的左括号要先闭合，因此可以将这个左括号放入栈顶。
+
+
+import java.util.*;
 
 class _20有效的括号 {
-    public boolean isValid(String s) {
 
+    public static void main(String[] args) {
+
+        Stack<Integer> integers = new Stack<>();
+
+
+//        System.out.println(_20有效的括号.isValid("[["));
+    }
+
+    public static boolean isValid(String s) {
+        //括号不是成对的直接返回 false
+        if (s.length() % 2 != 0) {
+            return false;
+        }
+        // 括号的对应关系
+        Map<Character, Character> map = new HashMap<>();
+        map.put('(', ')');
+        map.put('[', ']');
+        map.put('{', '}');
+
+        // 栈
+        Stack<Character> stack = new Stack<>();
+        char[] chars = s.toCharArray();
+        for (char c : chars) {
+            if (map.containsKey(c)) {
+                stack.push(c);
+                continue;
+            }
+
+            if (!stack.isEmpty() && c == map.get(stack.peek())) {
+                stack.pop();
+            } else {
+                return false;
+            }
+        }
+        return stack.isEmpty();
     }
 }
