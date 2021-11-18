@@ -64,11 +64,7 @@ import java.util.*;
 class _20有效的括号 {
 
     public static void main(String[] args) {
-
-        Stack<Integer> integers = new Stack<>();
-
-
-//        System.out.println(_20有效的括号.isValid("[["));
+        System.out.println(_20有效的括号.isValid("[["));
     }
 
     public static boolean isValid(String s) {
