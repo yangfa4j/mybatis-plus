@@ -70,7 +70,7 @@ class _26删除有序数组中的重复项 {
         for (int i = 0; i < nums.length; i++) {
             // 双指针,覆盖数组中的元素，使其头部有序且去重
             if (nums[i] != nums[count]) {
-                count++;
+                count++; // 第一位为默认值，不用改变
                 nums[count] = nums[i];
             }
         }
