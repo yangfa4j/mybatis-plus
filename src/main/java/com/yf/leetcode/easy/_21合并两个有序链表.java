@@ -78,12 +78,7 @@ public class _21合并两个有序链表 {
             curr = curr.next;
         }
         // 接上剩下的
-        if (null == p) {
-            curr.next = q;
-        }
-        if (null == q) {
-            curr.next = p;
-        }
+        curr.next = q == null ? p : q;
         return headNode.next;
     }
 }
