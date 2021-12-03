@@ -60,11 +60,11 @@ class _09回文数 {
     }
 
     public static boolean isPalindrome(int x) {
-        int y = x;
         // 排除负数
         if (x < 0) {
             return Boolean.FALSE;
         }
+        int y = x;
         int result = 0;
         do {
             result = result * 10 + y % 10;

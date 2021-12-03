@@ -108,7 +108,7 @@ public class _01两数之和 {
         // 实际值为 key , 下标为 value
         HashMap<Integer, Integer> map = Maps.newHashMap();
         for (int i = 0; i < nums.length; i++) {
-            int temp = target = nums[i];
+            int temp = target - nums[i];
             if (map.containsKey(temp) && map.get(temp) != i) {
                 return new int[]{i, map.get(temp),};
             }

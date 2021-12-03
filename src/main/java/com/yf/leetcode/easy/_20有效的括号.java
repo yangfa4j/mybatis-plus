@@ -86,7 +86,6 @@ class _20有效的括号 {
                 stack.push(c);
                 continue;
             }
-
             if (!stack.isEmpty() && c == map.get(stack.peek())) {
                 stack.pop();
             } else {

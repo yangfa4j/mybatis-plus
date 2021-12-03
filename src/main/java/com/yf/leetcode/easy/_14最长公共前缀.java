@@ -28,7 +28,7 @@ package com.yf.leetcode.easy;
 // 0 <= strs[i].length <= 200 
 // strs[i] 仅由小写英文字母组成 
 // 
-// Related Topics 字符串 
+// Related Topics 字符串 纵向比较一下
 // 👍 1864 👎 0
 
 
@@ -45,9 +45,10 @@ class _14最长公共前缀 {
         if (null == strs || strs.length < 1) {
             return "";
         }
+        // 循环第一个数组的次数
         for (int i = 0; i < strs[0].length(); i++) {
             for (int j = 1; j < strs.length; j++) {
-                // 当 i 自增 到某一个数组的长度时，此时就应该截断
+                // 当 i 自增 到某一个数组的长度时 或者相同下标的字符不一致，此时就应该截断返回
                 if (i == strs[j].length() || strs[0].charAt(i) != strs[j].charAt(i)) {
                     return strs[0].substring(0, i);
                 }
