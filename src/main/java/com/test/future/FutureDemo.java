@@ -3,24 +3,27 @@ package com.test.future;
 import java.util.concurrent.*;
 
 public class FutureDemo {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        // 开始时间
+        long starttime = System.currentTimeMillis();
+        // 线程池
         ExecutorService executorService = Executors.newCachedThreadPool();
-
-        // 提交 callable 到线程池
-        Future future = executorService.submit(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                TimeUnit.SECONDS.sleep(5);
-                return 1;
-            }
+        //input1生成， 需要耗费3秒
+        Future<Integer> future1 = executorService.submit(() -> {
+            TimeUnit.SECONDS.sleep(3);
+            return 5;
         });
-
-        try {
-            // 阻塞获取future的值
-            Integer result = (Integer) future.get();
-            System.out.println(result);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        //input2生成， 需要耗费2秒
+        Future<Integer> future2 = executorService.submit(() -> {
+            TimeUnit.SECONDS.sleep(2);
+            return 1;
+        });
+        // 获取 Future 结果
+        Integer integer1 = future1.get();
+        Integer integer2 = future2.get();
+        // 结束时间
+        long endtime = System.currentTimeMillis();
+        System.out.println(integer1 + integer2);
+        System.out.println("用时：" + (endtime - starttime) + "毫秒");
     }
 }

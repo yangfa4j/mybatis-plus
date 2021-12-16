@@ -49,7 +49,7 @@ package com.yf.leetcode.easy;
 // 无符号类型：全是表示数的大小                                    有符号数： 01111111    值：127
 // 有符号32的数字表示大小为  -2^31 - 2^31-1
 
-class _07整数反转 {
+public class _07整数反转 {
 
     public static void main(String[] args) {
         int reverse = _07整数反转.reverse(123456);

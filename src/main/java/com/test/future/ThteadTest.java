@@ -2,12 +2,7 @@ package com.test.future;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.concurrent.*;
 
 /**
  * @Date 2021/4/21
@@ -43,89 +38,132 @@ public class ThteadTest {
 //        log.info("callable执行结果是：{}", s);
 //        executorService.shutdown();
 
+
 //        threadTest();
-
-        futureTest();
-
+//        futureTaskThreadTest();
+//        futureTaskExecutorServiceTest();
+        futureTaskThreadTest();
     }
 
+    /**
+     * 继承 thread 类
+     */
     public static void threadTest() throws Exception {
+        // 开始时间
         long start = System.currentTimeMillis();
-
-        // 等凉菜 -- 必须要等待返回的结果，所以要调用join方法
+        // 准备凉菜，花费1秒钟 -- 必须要等待返回的结果，所以要调用join方法
         ColdDishThread coldDishThread = new ColdDishThread();
         coldDishThread.start();
         coldDishThread.join();
-
-        // 等包子 -- 必须要等待返回的结果，所以要调用join方法
+        // 准备包子，花费3秒钟 -- 必须要等待返回的结果，所以要调用join方法
         BumThread bumThread = new BumThread();
         bumThread.start();
         bumThread.join();
-
+        //结束时间
         long end = System.currentTimeMillis();
         System.out.println("准备完毕时间：" + (end - start));
     }
 
-    public static void futureTest() throws Exception {
+    /**
+     * future + ExecutorService 使用
+     */
+    public static void futureExecutorServiceTest() throws Exception {
+        // 开始时间
         long start = System.currentTimeMillis();
-        Callable cal1 = new Callable<String>() {
+        // 线程池
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        // callable -- 准备凉菜，花费1秒钟
+        Callable callable1 = new Callable<String>() {
             @Override
             public String call() throws Exception {
                 TimeUnit.SECONDS.sleep(1);
                 return "凉菜准备完成";
             }
         };
-        FutureTask<String> ft1 = new FutureTask<String>(cal1);
-        new Thread(ft1).start();
-
-        Callable cal2 = new Callable<String>() {
+        // callable -- 准备包子，花费3秒钟
+        Callable callable2 = new Callable<String>() {
             @Override
             public String call() throws Exception {
                 TimeUnit.SECONDS.sleep(3);
                 return "包子准备完成";
             }
         };
-        FutureTask<String> ft2 = new FutureTask<String>(cal2);
-        new Thread(ft2).start();
-
-        System.out.println(ft1.get());
-        System.out.println(ft2.get());
-
+        // 提交到线程池
+        Future future1 = executorService.submit(callable1);
+        Future future2 = executorService.submit(callable2);
+        // 获取 future 结果
+        System.out.println(future1.get());
+        System.out.println(future2.get());
+        // 结束时间
         long end = System.currentTimeMillis();
         System.out.println("准备完毕时间：" + (end - start));
     }
 
-    // 传递方法参数
-    public Consumer<String> consumer() {
-        return new Consumer<String>() {
+    /**
+     * future + ExecutorService 使用
+     */
+    public static void futureTaskExecutorServiceTest() throws Exception {
+        // 开始时间
+        long start = System.currentTimeMillis();
+        // 线程池
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        // futureTask -- 准备凉菜，花费1秒钟
+        FutureTask<String> futureTask1 = new FutureTask<>(new Callable<String>() {
             @Override
-            public void accept(String s) {
-                System.out.println(s.toUpperCase());
+            public String call() throws Exception {
+                TimeUnit.SECONDS.sleep(1);
+                return "凉菜准备完成";
             }
-        };
-    }
-
-    // 传递方法参数
-    public Supplier<String> supplier() {
-        return new Supplier<String>() {
+        });
+        // futureTask -- 准备包子，花费3秒钟
+        FutureTask<String> futureTask2 = new FutureTask<>(new Callable<String>() {
             @Override
-            public String get() {
-                return "调用了 Supplier方法";
+            public String call() throws Exception {
+                TimeUnit.SECONDS.sleep(3);
+                return "包子准备完成";
             }
-        };
+        });
+        // 提交到线程池
+        executorService.submit(futureTask1);
+        executorService.submit(futureTask2);
+        // 获取 futureTask 结果
+        System.out.println(futureTask1.get());
+        System.out.println(futureTask2.get());
+        // 结束时间
+        long end = System.currentTimeMillis();
+        System.out.println("准备完毕时间：" + (end - start));
     }
 
-    public void consumerTest(Consumer<String> consumer, List<String> arrays) {
-        for (String array : arrays) {
-            consumer.accept(array);
-        }
+    /**
+     * futureTask + thread 使用，被当作 runnable 使用
+     */
+    public static void futureTaskThreadTest() throws Exception {
+        // 开始时间
+        long start = System.currentTimeMillis();
+        // FutureTask -- 准备凉菜，花费1秒钟
+        FutureTask<String> futureTask1 = new FutureTask<>(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                TimeUnit.SECONDS.sleep(1);
+                return "凉菜准备完成";
+            }
+        });
+        // FutureTask -- 准备包子，花费3秒钟
+        FutureTask<String> futureTask2 = new FutureTask<>(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                TimeUnit.SECONDS.sleep(3);
+                return "包子准备完成";
+            }
+        });
+        // 开启两个线程
+        new Thread(futureTask1).start();
+        new Thread(futureTask2).start();
+        // 获取 futureTask 结果
+        System.out.println(futureTask1.get());
+        System.out.println(futureTask2.get());
+        //结束时间
+        long end = System.currentTimeMillis();
+        System.out.println("准备完毕时间：" + (end - start));
     }
-
-    public void SupplierTest(Supplier<String> stringSupplier, List<String> arrays) {
-        for (String array : arrays) {
-            stringSupplier.get();
-        }
-    }
-
-
 }

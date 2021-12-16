@@ -56,7 +56,7 @@ package com.yf.leetcode.easy;
 // 👍 2342 👎 0
 
 
-class _26删除有序数组中的重复项 {
+public class _26删除有序数组中的重复项 {
 
     public static void main(String[] args) {
         _26删除有序数组中的重复项.removeDuplicates(new int[]{1, 1, 2, 2, 3, 4, 5, 5,});

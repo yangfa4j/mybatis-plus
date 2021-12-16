@@ -81,7 +81,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-class _13罗马数字转整数 {
+public class _13罗马数字转整数 {
 
     public static void main(String[] args) {
         int result = _13罗马数字转整数.romanToInt("MCMXCIV");

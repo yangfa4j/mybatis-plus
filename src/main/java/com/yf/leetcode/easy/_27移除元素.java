@@ -59,7 +59,7 @@ package com.yf.leetcode.easy;
 // 👍 1097 👎 0
 
 
-class _27移除元素 {
+public class _27移除元素 {
 
     public static void main(String[] args) {
         int i = _27移除元素.removeElement(new int[]{3, 2, 2, 3,}, 3);
@@ -73,7 +73,9 @@ class _27移除元素 {
         int count = 0;
         for (int i = 0; i < nums.length; i++) {
             if (nums[i] != val) {
-                nums[count++] = nums[i];
+                nums[count] = nums[i];
+                // 从头开始覆盖
+                count++;
             }
         }
         return count;

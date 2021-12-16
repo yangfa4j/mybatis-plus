@@ -61,7 +61,7 @@ package com.yf.leetcode.easy;
 
 import java.util.*;
 
-class _20有效的括号 {
+public class _20有效的括号 {
 
     public static void main(String[] args) {
         System.out.println(_20有效的括号.isValid("[["));

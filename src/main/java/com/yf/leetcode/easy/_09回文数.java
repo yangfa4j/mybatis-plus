@@ -52,7 +52,7 @@ package com.yf.leetcode.easy;
 
 import java.util.Objects;
 
-class _09回文数 {
+public class _09回文数 {
 
     public static void main(String[] args) {
         System.out.println(_09回文数.isPalindrome(121));

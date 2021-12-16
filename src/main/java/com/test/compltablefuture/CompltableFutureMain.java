@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  */
 public class CompltableFutureMain {
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws Exception {
 
         List<Shop> shopList = Arrays.asList(
                 new Shop("BestPrice"),
@@ -22,14 +22,18 @@ public class CompltableFutureMain {
 
         long startTime = System.currentTimeMillis();
 //        findPriceSync(shopList);
-//        findPriceAsync(shopList);
-        findPriceFutureAsyncWithFuture(shopList);
+//        findPriceWithCompletableFuture(shopList);
+//        findPriceWithFuture(shopList);
+//        findPriceWithFutureTask(shopList);
+        findPriceWithCompletableFutureCountDownLatch(shopList);
         long endTime = System.currentTimeMillis();
         System.out.println("用时：" + (endTime - startTime) + "毫秒");
-
 //        testCompltableFuture();
     }
 
+    /**
+     * 同步调用获取商品价格
+     */
     private static List<String> findPriceSync(List<Shop> shopList) {
         List<String> collect = shopList.stream()
                 .map(shop -> String.format("%s price is %.2f", shop.getName(), shop.getPrice()))
@@ -38,81 +42,122 @@ public class CompltableFutureMain {
         return collect;
     }
 
-    private static List<String> findPriceAsync(List<Shop> shopList) {
-        // 获取产品价格，都用异步来实现
-        List<CompletableFuture<String>> completableFutureList = shopList.stream()
-                //转异步执行
-                .map(shop -> CompletableFuture.supplyAsync(() -> String.format("%s price is %.2f", shop.getName(), shop.getPrice())))
-                .collect(Collectors.toList());
-
-        List<String> collect = completableFutureList.stream()
-                .map(CompletableFuture::join)  //获取结果不会抛出异常
-                .collect(Collectors.toList());
-        collect.forEach(System.out::println);
-        return collect;
-    }
-
-    private static List<String> findPriceFutureAsync(List<Shop> shopList) {
+    /**
+     * 异步方式，使用 Future + ExecutorService
+     */
+    private static List<String> findPriceWithFuture(List<Shop> shopList) {
+        // 线程池
         ExecutorService es = Executors.newCachedThreadPool();
+        // 提交到线程池
         List<Future<String>> futureList = shopList.stream()
                 .map(shop -> es.submit(() -> String.format("%s price is %.2f", shop.getName(), shop.getPrice())))
                 .collect(Collectors.toList());
 
-        List<String> collect = futureList.stream()
+        List<String> strings = futureList.stream()
                 .map(future -> {
                     String result = null;
                     try {
                         result = future.get();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     return result;
                 }).collect(Collectors.toList());
-        collect.forEach(System.out::println);
-        return collect;
+        strings.forEach(System.out::println);
+        return strings;
     }
 
-    private static List<String> findPriceFutureAsyncWithFuture(List<Shop> shopList) {
+    /**
+     * 异步方式，FutureTask + ExecutorService
+     */
+    private static List<String> findPriceWithFutureTask(List<Shop> shopList){
+        // 线程池
         ExecutorService es = Executors.newCachedThreadPool();
-        List<Future<String>> futureList = shopList.stream().map(shop -> es.submit(() -> String.format("%s price is %.2f",
-                shop.getName(), shop.getPrice()))).collect(Collectors.toList());
+        // 包装成 FutureTask 并提交到线程池
+        List<FutureTask<String>> futureTasks = shopList.stream()
+                .map(shop -> {
+                    FutureTask<String> stringFutureTask = new FutureTask<>(() -> String.format("%s price is %.2f", shop.getName(), shop.getPrice()));
+                    es.submit(stringFutureTask);
+                    return stringFutureTask;
+                }).collect(Collectors.toList());
 
-        List<String> collect = futureList.stream().map(future -> {
-            String result = null;
-            try {
-                result = future.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-            return result;
-        }).collect(Collectors.toList());
-        collect.forEach(System.out::println);
-        return collect;
+        List<String> strings = futureTasks.stream()
+                .map(future -> {
+                    String result = null;
+                    try {
+                        result = future.get();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return result;
+                }).collect(Collectors.toList());
+        strings.forEach(System.out::println);
+        return strings;
     }
 
-    private static void testCompltableFuture() throws ExecutionException, InterruptedException {
+    /**
+     * 异步方式，使用 CompletableFuture
+     */
+    private static List<String> findPriceWithCompletableFuture(List<Shop> shopList) {
+        // 获取产品价格，都用异步来实现
+        List<CompletableFuture<String>> completableFutureList = shopList.stream()
+                //转 CompletableFuture 执行
+                .map(shop -> CompletableFuture.supplyAsync(() -> String.format("%s price is %.2f", shop.getName(), shop.getPrice())))
+                .collect(Collectors.toList());
 
+        List<String> strings = completableFutureList.stream()
+                .map(CompletableFuture::join)  //获取结果不会抛出异常
+                .collect(Collectors.toList());
+        strings.forEach(System.out::println);
+        return strings;
+    }
+
+    /**
+     * 异步方式，使用 CompletableFuture + CountDownLatch
+     */
+    private static List<String> findPriceWithCompletableFutureCountDownLatch(List<Shop> shopList) throws Exception {
+        // CountDownLatch
+        CountDownLatch countDownLatch = new CountDownLatch(shopList.size());
+        // 获取产品价格，都用异步来实现。
+        List<CompletableFuture<String>> completableFutureList = shopList.stream()
+                //转 CompletableFuture 执行 且执行完后 countDownLatch -1
+                .map(shop -> CompletableFuture.supplyAsync(() -> {
+                    countDownLatch.countDown();
+                    return String.format("%s price is %.2f", shop.getName(), shop.getPrice());
+                })).collect(Collectors.toList());
+        // 获取 CompletableFutures 的结果
+        List<String> strings = completableFutureList.stream()
+                .map(CompletableFuture::join)  //获取结果不会抛出异常
+                .collect(Collectors.toList());
+        // 等到所有异步操作执行完
+        countDownLatch.await();
+        strings.forEach(System.out::println);
+        return strings;
+    }
+
+
+
+    private static void testCompltableFuture() throws Exception {
         //getNow方法测试
         CompletableFuture<String> cp1 = CompletableFuture.supplyAsync(() -> {
             try {
-                TimeUnit.SECONDS.sleep(1);
+                // 睡5s
+                TimeUnit.SECONDS.sleep(5);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             return "hello world";
         });
-        System.out.println(cp1.getNow("hello h2t"));
+        // 获取不到 返回 hello
+        System.out.println(cp1.getNow("hello"));
+
+        //get方法测试，抛出 java.lang.ArithmeticException: / by zero
+        CompletableFuture<Integer> cp3 = CompletableFuture.supplyAsync((() -> 1 / 0));
+        System.out.println(cp3.get());
 
         //join方法测试
         CompletableFuture<Integer> cp2 = CompletableFuture.supplyAsync((() -> 1 / 0));
         System.out.println(cp2.join());
 
-        //get方法测试
-        CompletableFuture<Integer> cp3 = CompletableFuture.supplyAsync((() -> 1 / 0));
-        System.out.println(cp3.get());
     }
 }

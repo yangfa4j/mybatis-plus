@@ -32,7 +32,7 @@ package com.yf.leetcode.easy;
 // 👍 1864 👎 0
 
 
-class _14最长公共前缀 {
+public class _14最长公共前缀 {
 
     public static void main(String[] args) {
         String[] strs = new String[]{"abc","ab", "a"};

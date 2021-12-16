@@ -11,42 +11,33 @@ import java.util.concurrent.FutureTask;
  */
 public class FutureTaskMain {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-
+        // 开始时间
         long starttime = System.currentTimeMillis();
-
-        //input2生成， 需要耗费3秒
-        FutureTask<Integer> input2_futuretask = new FutureTask<>(new Callable<Integer>() {
-
+        //input1生成， 需要耗费3秒
+        FutureTask<Integer> futureTask1 = new FutureTask<>(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
                 Thread.sleep(3000);
                 return 5;
             }
         });
-
-        //input1生成，需要耗费2秒
-        FutureTask<Integer> input1_futuretask = new FutureTask<>(new Callable<Integer>() {
-
+        //input2生成，需要耗费2秒
+        FutureTask<Integer> futureTask2 = new FutureTask<>(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
                 Thread.sleep(2000);
                 return 3;
             }
         });
-
-        new Thread(input2_futuretask).start();
-        new Thread(input1_futuretask).start();
-
-        Integer integer2 = input2_futuretask.get();
-        Integer integer1 = input1_futuretask.get();
-
-        System.out.println(add(integer1, integer2));
+        // 开启两个线程
+        new Thread(futureTask1).start();
+        new Thread(futureTask2).start();
+        // 获取 FutureTask 结果
+        Integer integer2 = futureTask1.get();
+        Integer integer1 = futureTask2.get();
+        System.out.println(integer1 + integer2);
+        // 结束时间
         long endtime = System.currentTimeMillis();
         System.out.println("用时：" + (endtime - starttime) + "毫秒");
-    }
-
-    //这是我们要执行的算法
-    public static int add(int input, int input2) {
-        return input + input2;
     }
 }

@@ -52,9 +52,6 @@ public class _21合并两个有序链表 {
         node5.next = node6;
         node6.next = node7;
         ListNode listNode = _21合并两个有序链表.mergeTwoLists(node2, node5);
-
-//        ListNode listNode = _21合并两个有序链表.mergeTwoLists01(new ListNode(1), null);
-
         System.out.println("listNode = " + listNode);
     }
 
