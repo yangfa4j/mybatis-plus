@@ -1,6 +1,6 @@
 package com.test.compltablefuture;
 
-import java.util.Arrays;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -14,21 +14,7 @@ public class CompltableFutureMain {
 
     public static void main(String[] args) throws Exception {
 
-        List<Shop> shopList = Arrays.asList(
-                new Shop("BestPrice"),
-                new Shop("LetsSaveBig"),
-                new Shop("MyFavoriteShop"),
-                new Shop("BuyItAll"));
-
-        long startTime = System.currentTimeMillis();
-//        findPriceSync(shopList);
-//        findPriceWithCompletableFuture(shopList);
-//        findPriceWithFuture(shopList);
-//        findPriceWithFutureTask(shopList);
-        findPriceWithCompletableFutureCountDownLatch(shopList);
-        long endTime = System.currentTimeMillis();
-        System.out.println("用时：" + (endTime - startTime) + "毫秒");
-//        testCompltableFuture();
+      testScheduledExecutorService();
     }
 
     /**
@@ -159,5 +145,17 @@ public class CompltableFutureMain {
         CompletableFuture<Integer> cp2 = CompletableFuture.supplyAsync((() -> 1 / 0));
         System.out.println(cp2.join());
 
+    }
+
+    private static void testScheduledExecutorService() throws Exception {
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        // 创建并执行在给定延迟后启用的一次性操作
+        scheduledExecutorService.schedule(() -> System.out.println("一次性执行，当前时间 = " + LocalDateTime.now()),5,TimeUnit.SECONDS);
+
+        // 创建并执行一个周期性动作，在给定的初始延迟后首先启用，然后在给定的时间段内启用
+        scheduledExecutorService.scheduleAtFixedRate(() -> System.out.println("延迟一秒后，间隔三秒执行一次，当前时间 = " + LocalDateTime.now()),1,3,TimeUnit.SECONDS);
+
+        // 创建并执行一个周期性动作，在给定的初始延迟后首先启用，然后在给定的时间段内启用
+        scheduledExecutorService.scheduleWithFixedDelay(() -> System.out.println("延迟一秒后，间隔三秒执行一次，当前时间 = " + LocalDateTime.now()),1,3,TimeUnit.SECONDS);
     }
 }
