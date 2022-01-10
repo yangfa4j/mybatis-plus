@@ -13,8 +13,7 @@ import java.util.stream.Collectors;
 public class CompltableFutureMain {
 
     public static void main(String[] args) throws Exception {
-
-      testScheduledExecutorService();
+        testScheduledExecutorService();
     }
 
     /**
@@ -56,7 +55,7 @@ public class CompltableFutureMain {
     /**
      * 异步方式，FutureTask + ExecutorService
      */
-    private static List<String> findPriceWithFutureTask(List<Shop> shopList){
+    private static List<String> findPriceWithFutureTask(List<Shop> shopList) {
         // 线程池
         ExecutorService es = Executors.newCachedThreadPool();
         // 包装成 FutureTask 并提交到线程池
@@ -122,7 +121,6 @@ public class CompltableFutureMain {
     }
 
 
-
     private static void testCompltableFuture() throws Exception {
         //getNow方法测试
         CompletableFuture<String> cp1 = CompletableFuture.supplyAsync(() -> {
@@ -150,12 +148,12 @@ public class CompltableFutureMain {
     private static void testScheduledExecutorService() throws Exception {
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
         // 创建并执行在给定延迟后启用的一次性操作
-        scheduledExecutorService.schedule(() -> System.out.println("一次性执行，当前时间 = " + LocalDateTime.now()),5,TimeUnit.SECONDS);
+        scheduledExecutorService.schedule(() -> System.out.println("一次性执行，当前时间 = " + LocalDateTime.now()), 5, TimeUnit.SECONDS);
 
         // 创建并执行一个周期性动作，在给定的初始延迟后首先启用，然后在给定的时间段内启用
-        scheduledExecutorService.scheduleAtFixedRate(() -> System.out.println("延迟一秒后，间隔三秒执行一次，当前时间 = " + LocalDateTime.now()),1,3,TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(() -> System.out.println("延迟一秒后，间隔三秒执行一次，当前时间 = " + LocalDateTime.now()), 1, 3, TimeUnit.SECONDS);
 
         // 创建并执行一个周期性动作，在给定的初始延迟后首先启用，然后在给定的时间段内启用
-        scheduledExecutorService.scheduleWithFixedDelay(() -> System.out.println("延迟一秒后，间隔三秒执行一次，当前时间 = " + LocalDateTime.now()),1,3,TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(() -> System.out.println("延迟一秒后，间隔三秒执行一次，当前时间 = " + LocalDateTime.now()), 1, 3, TimeUnit.SECONDS);
     }
 }
