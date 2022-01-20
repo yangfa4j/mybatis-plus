@@ -1,0 +1,31 @@
+@startuml
+Actor C as "client" order 1
+participant A as "appcenter" order 2
+database DB order 2
+participant P as "passportsvc" order 3
+title: 插件升级
+== 插件升级 ==
+C->A: PB check_upgrade 客户端打开后轮询
+activate A
+A->A: 通过传入version,appName和device_code判断是否需要插件升级
+note right  A
+    判断逻辑：
+        1、通过appName和device_code判断（白名单）
+        2、通过appName和device_code hash策略（百分比）判断（灰度）
+        3、通过appName和device_code 判断（全量）
+end note
+A->C: 判断命中，返回需要升级的版本配置json；没命中不返回
+deactivate A
+C->C: 根据返回的配置json中的插件版本和本地的插件版本对比\n有不同的下载到本地，全部下载完重置本地升级标志
+C->C: 客户端下次重启时根据本地升级标志来决定是否升级插件
+
+== 用户汇报设备信息 ==
+C->A: PT 用户登录后汇报设备和版本信息
+activate A
+A->P: 验证token
+activate P
+return 返回用户信息
+create DB
+A ->DB: 客户端汇报devicecode，appname，当前使用的插件version信息\n把devicecode和用户关系对应起来落库用户当前设备表\n若用户使用的设备或者版本信息发送变化，落库log表
+return
+@enduml

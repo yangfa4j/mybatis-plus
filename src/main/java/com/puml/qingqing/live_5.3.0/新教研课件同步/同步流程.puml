@@ -1,0 +1,28 @@
+@startuml
+title 新教研课件同步在线流程
+start
+: 易力:同步流程start;
+: api教研后台上线时，调用接口通知coursewaresvc新增一份上架课件，需要给出 tr_courseware_id，tr_courseware_edition_id;
+: coursewaresvc 调用 api 查询课件信息接口，需要给出课件基础信息（不会经常变动的信息），额外信息（经常变动的信息）;
+: 其中教研课件中如果和我们在线字段可以复用，数据落在 t_courseware_onshelf，否则存在 t_courseware_onshelf_extend表（此处extend可以抽象为多场表）
+coursewaresvc 生成一条 courseware_repository 记录，同时把新的 courseware_repository_id 与新的 t_courseware_onshelf 中的记录关联;
+note left: 同步数据到在线库,其中 tr_courseware_id，tr_courseware_edition_id 落在 t_courseware_repository 或 t_courseware_repository_extend
+: 易力：同步流程end;
+end
+
+start
+: 杨发：es同步流程start;
+note left: es 索引的设计，推荐课程内容 与 挂载课件内容为两个数组
+:  全量逻辑：（扫描 t_courseware_onshelf，t_courseware_onshelf_extend相关表）;
+:  增量逻辑:（监听 maxwell Kafka消息  解析 binlog）完成同步;
+: 杨发：es同步流程流程end;
+end
+
+start
+: 新版课件库相关功能start;
+: 搜索接口：liveteachingsvc 代理调用 livesearchsvc 返回基本数据给前端;
+: 课件详细信息由 liveteachingsvc 代理调用 coursewaresvc （PI 获取新版共享课件详情接口，查询t_courseware_onshelf，t_courseware_onshelf_extend相关表 ） ;
+: 新版课件库相关功能end;
+end
+
+@enduml

@@ -1,0 +1,39 @@
+
+@startuml
+title 首页时序图（操作接口）
+
+alt 课中记笔记场景
+用户 -> 客户端: 点击"课中记笔记"
+客户端 -> livebff: 调用pt接口判断未来一个月是否有未完成的课
+livebff -> livesvc: 调用pbff接口判断未来一个月是否有未完成的课
+livesvc -> livebff: response（课程用于跳转）
+livebff -> 客户端: response（课程用于跳转）
+end
+== 课中记笔记场景 ==
+
+alt 课中标记重点场景
+用户 -> 客户端: 点击"课中标记重点"
+客户端 -> livebff: 调用pt接口判断未来一个月是否有未完成的课
+livebff -> livesvc: 调用pbff接口判断未来一个月是否有未完成的课
+livesvc -> livebff: response（课程用于跳转）
+livebff -> 客户端: response（课程用于跳转）
+note right
+    还是需要提供课程时间给前端做跳转
+end note
+end
+
+== 课中标记重点场景 ==
+
+alt 课后完成作业
+用户 -> 客户端: 点击课中记笔记
+客户端 -> livebff: 调用pt接口判断是否有未完成的作业
+livebff -> api服务: 调用pbff接口判断是否有未完成的作业
+livesvc -> livebff: response（作业id用于跳转）
+livebff -> 客户端: response（作业id用于跳转）
+note right
+    api提供用户未完成作业列表
+end note
+end
+== 课后完成作业 ==
+
+@enduml

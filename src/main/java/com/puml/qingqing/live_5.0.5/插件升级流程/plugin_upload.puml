@@ -1,0 +1,23 @@
+@startuml
+Actor P as "打包程序" order 1
+database oss as "OSS" order 3
+participant ap as "appcenter" order 2
+participant img as "imgsvc" order 3
+
+title: 打包插件上传流程
+
+P -> ap: 获取bucket信息
+activate ap
+ap -> img: pi alicloud/auth
+activate img
+img -->ap: EndPoint，Bucket，AccessKeyId，AccessKeySecret，UploadPath
+deactivate img
+ap --> P: bucket信息
+deactivate ap
+P-> oss ** : 根据bucket信息上传插件到oss
+return 上传成功
+P -> ap: 汇报plugin信息（bucket，相对地址，插件基本信息）
+activate ap
+return appcenter落库plugin后返回
+
+@enduml

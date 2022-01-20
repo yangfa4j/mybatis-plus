@@ -1,0 +1,16 @@
+
+@startuml
+title 成长值获取场景-下课-异步事件（接口）
+
+alt
+
+actor 老师
+
+老师 -> 老师端: 点击下课完成下课流程
+老师端 -> livesvc: 调用下课接口（创建异步事件）
+livesvc -> api服务: 异步事件 调用pi接口给学生增加成长值
+api服务 -> livesvc: response(不关心结果)
+
+end
+
+@enduml

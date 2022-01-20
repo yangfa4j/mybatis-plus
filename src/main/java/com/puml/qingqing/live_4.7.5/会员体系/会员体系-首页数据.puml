@@ -1,0 +1,17 @@
+
+@startuml
+title 首页时序图（渲染数据接口）
+客户端 -> livebff: 调用首页数据信息接口
+
+alt 并行调用接口获取数据
+livebff -> api服务: 调用会员服务Pbff 获取用户会员简要信息
+livebff -> api服务: 调用会员服务Pbff 用户首页成长任务入口信息（任务/当日完成次数）
+note right
+    成长值/name/青豆/勋章等级/当前使用勋章/还需x成长值升级
+end note
+end
+livebff -> livebff: 组装数据
+livebff -> 客户端: response
+
+
+@enduml

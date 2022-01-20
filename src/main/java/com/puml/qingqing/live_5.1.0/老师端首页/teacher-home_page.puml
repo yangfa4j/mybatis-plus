@@ -1,0 +1,23 @@
+@startuml
+Actor C as "client" order 1
+participant BFF as "livebff" order 2
+participant LIVE as "livesvc" order 3
+participant SVC as "svc" order 3
+participant COURSE as "coursesvc" order 3
+participant TEACHER as "teachersvc" order 3
+
+title: 老师端首页
+
+C -> BFF: teacher/home_page/v1/info/query
+activate BFF
+BFF-> LIVE: recent_teacher_live_order_course_info(wiki:251168179)
+BFF-> SVC: home_task_todo(wiki:251625808)
+BFF-> COURSE: teacher_course_statistics(wiki:251626097)
+BFF-> TEACHER: pre_set_rest_time(wiki:264208476)
+LIVE-> BFF: 返回最近课程信息
+SVC->BFF: 返回任务相关
+COURSE->BFF: 返回老师已排课时长
+TEACHER-> BFF: 返回是否存在可编辑排课时间
+BFF->BFF: 拆分待备课列表
+return 老师端首页所需信息
+@enduml

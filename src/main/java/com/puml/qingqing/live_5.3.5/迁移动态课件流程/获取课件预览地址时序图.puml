@@ -1,0 +1,31 @@
+@startuml
+title 获取动态课件预览地址时序图
+autonumber
+actor 前端
+participant liveteachingsvc
+participant coursewaresvc
+participant liveresourcesvc
+participant 教研云 as jyy
+database 数据库 as db
+participant playsvc
+
+
+前端->liveteachingsvc:PT 获取教研云动态课件详情 wiki:221348558
+liveteachingsvc ->coursewaresvc:PI 获取教研云课件预览地址及原始json数据V2 wiki:104956233
+note left:相关接口wiki:283247482、102466217、104956229、104956233
+coursewaresvc -> liveresourcesvc:PI 获取教研云课件预览地址
+alt 开关打开走新逻辑
+liveresourcesvc -> db:t_resource_upload_result.dest_media_id，即为 folder
+note left: resource_media_sub_type 为动态课件迁移任务的记录
+db-> liveresourcesvc: 返回 目录的 media_id
+liveresourcesvc -> playsvc: PI 获取 folder 的路径，服务端需要拼好地址
+playsvc -> liveresourcesvc: 返回 folder 路径
+liveresourcesvc -> coursewaresvc:返回轻轻测动态课件预览地址
+end
+alt 开关关闭走老逻辑 -- 访问教研云
+coursewaresvc -> jyy: 获取动态课件预览地址：courseWare/getCloudCourseWareUrl.json
+jyy -> coursewaresvc: 返回动态课件预览地址
+end
+coursewaresvc-> liveteachingsvc: 返回教研云课件预览地址及原始json数据
+liveteachingsvc-> 前端:return
+@enduml

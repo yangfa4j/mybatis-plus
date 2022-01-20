@@ -1,0 +1,42 @@
+@startuml
+title 获取资源
+|||
+participant "front-end" AS front
+'participant liveteachingsvc
+participant "coursewaresvc\ntrresearchsvc（类似）" AS coursewaresvc
+participant liveresourcesvc
+participant "trcloud\nhf-service" AS trcloud
+'front -> liveteachingsvc: 获取课件详情
+'liveteachingsvc -> coursewaresvc: 获取课件详情
+front -> coursewaresvc: 获取资源（课件还有中间层liveteachingsvc）
+group console开关 从liveresourcesvc获取资源
+    coursewaresvc -> liveresourcesvc: PI 获取资源推荐地址（resource_media_id_type）
+    alt console开关返回公有云资源地址 √
+        liveresourcesvc -[#blue]> liveresourcesvc: <color blue>select t_resource_upload_result.dest_media_id
+        liveresourcesvc -> playsvc: /api/pb/v2/download/file_path (by jsonDataMediaId)
+        liveresourcesvc --> coursewaresvc: return 公有云资源地址
+        coursewaresvc --> front: return oss_access_url（课件还有中间层liveteachingsvc）
+        front -> oss: oss_access_url
+        oss --> front: return jsonData<b>（Content-Type: text/plain; Content-Encoding: gzip）
+    else console开关源站资源地址 √ || 缓存资源不存在
+        liveresourcesvc --> coursewaresvc: return PB_resource_access_url（liveresourcesvc）
+        coursewaresvc --> front: return PB_resource_access_url（课件还有中间层liveteachingsvc）
+        front -> liveresourcesvc: PB 获取资源
+        liveresourcesvc -> trcloud: 获取资源详情jsonData
+        trcloud --> liveresourcesvc: return jsonData
+        liveresourcesvc --> front: return jsonData<color red><b>（Content-Type: text/plain; Content-Encoding: gzip）
+    end
+end
+group console开关 走老逻辑
+    note right coursewaresvc: 课件有以下逻辑，homework直接从教研云获取jsonData
+    alt console开关 返回jsonDataUrl || jsonData获取来源:公有云
+        coursewaresvc -[#blue]> coursewaresvc: <color blue>select t_courseware_upload_result.media_id
+        coursewaresvc -> playsvc: /api/pb/v2/download/file_path (by media_id)
+        playsvc --> coursewaresvc: return jsonDataUrl
+        coursewaresvc --> trresearchsvc: return jsonDataUrl(oss)\n\t / jsonData
+    else console开关 jsonData获取来源:第三方 || media_id / jsonDataUrl不存在
+        coursewaresvc -> trcloud: 获取资源详情jsonData
+        trcloud --> coursewaresvc: return jsonData
+    end
+end
+@enduml

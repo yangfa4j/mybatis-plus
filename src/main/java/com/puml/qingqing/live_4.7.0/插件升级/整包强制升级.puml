@@ -1,0 +1,25 @@
+@startuml
+Actor C as "client" order 1
+participant L as "livesvc" order 2
+title: 整包升级
+== 全量整包升级 ==
+C->L: PB check_upgrade 客户端轮询
+activate L
+L->L: 通过传入app,platform,version判断是否需要整包升级
+L->C: 需要返回1000，不需要返回0
+deactivate L
+ alt 需要升级
+    C->C: 根据返回的download_url下载包直接下载升级
+    else
+        end
+== 白名单整包升级 ==
+C->L: PT check_upgrade 老师客户端在登录后检测，学生客户端在上课前通过课程检测
+activate L
+L->L: 通过传入app,platform,version和用户\n（白名单只会配置到老师，学生通过课程匹配到老师）\n判断是否需要整包升级
+L->C: 需要返回1000，不需要返回0
+deactivate L
+ alt 需要升级
+    C->C: 根据返回的download_url下载包直接下载升级
+    else
+        end
+@enduml

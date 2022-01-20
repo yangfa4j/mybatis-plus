@@ -1,0 +1,70 @@
+@startuml
+title 缓存资源
+|||
+participant coursewaresvc
+participant trresearchsvc
+coursewaresvc -> coursewaresvc: 异步事件：缓存课件资源
+activate coursewaresvc
+coursewaresvc -> liveresourcesvc: PI 创建资源缓存任务 wiki:297894539\n（resource_media_id&type、upload_request_id&type）
+deactivate coursewaresvc
+trresearchsvc -> trresearchsvc: 异步事件：缓存作业资源
+activate trresearchsvc
+trresearchsvc -> liveresourcesvc: PI 创建资源缓存任务\n wiki:297894539\n（resource_media_id&type\n upload_request_id&type）
+deactivate trresearchsvc
+activate liveresourcesvc
+liveresourcesvc -[#blue]> liveresourcesvc: <color blue>insert t_resource_upload_summary\n<color purple>（uniq_upload_request_id_type去重）
+note right liveresourcesvc
+如果有相同t_resource_upload_summary.resource_media_id_type（检查场景）：
+\t未上传直接返回
+\t已上传则检查是否需要更新（比对t_resource_upload_result.dest_media_id内容与第三方是否一致）
+\t\t需要更新，走任务创建流程
+\t\t不需要更新，则更新t_resource_upload_result.last_check_time
+end note
+liveresourcesvc -> livedessvc: PI 创建des资源缓存任务 wk:297895344
+activate livedessvc
+liveresourcesvc -> liveresourcesvc: 定时重试（重新提交超过一定时长任务）\n  t_resource_upload_summary.status=1
+livedessvc -[#blue]> livedessvc: <color blue>insert t_resource_upload_task\n<color purple>（uniq_resource_summary_id去重）
+livedessvc -> livedessvc: push redis zset 任务队列
+livedessvc -> livedessvc: 定时任务重试（repush zest）\n（超过一定时长、retry_times>0\n  task status=1待上传/2上传中/5待重试）
+livedessvc --> liveresourcesvc: return resource_upload_task_id
+deactivate livedessvc
+liveresourcesvc -[#blue]> liveresourcesvc: <color blue>update t_resource_upload_summary\n\tresource_upload_task_id
+deactivate liveresourcesvc
+liveuploader -> livedessvc: 长跑线程获取任务（wk:16123113）\n/api/spb/v1/dest_upload/query_task
+activate liveuploader
+alt ① 教研云courseware
+    liveuploader -> liveresourcesvc: PI 获取教研云courseware源站地址
+    liveuploader -> liveresourcesvc: PB 获取教研云courseware jsonData
+    create trcloud
+    liveresourcesvc -> trcloud: /courseWare/getCloudCourseWareQuestionList
+else ② 教研云paper
+    liveuploader -> liveresourcesvc: PI 获取教研云paper源站地址
+    liveuploader -> liveresourcesvc: PB 获取教研云paper jsonData
+    liveresourcesvc -> trcloud: /platform/paper/rest/paper/getPaperAllInfo
+else ③ 海风静态课件
+    liveuploader -> liveresourcesvc: PI 获取海风静态课件源站地址
+    liveuploader -> liveresourcesvc: PB 获取海风静态课件 jsonData
+    create "hf-service"
+    liveresourcesvc -> "hf-service": /courseware/details
+end
+create "cos/oss"
+liveuploader -> "cos/oss": 上传jsonDataFile
+create imagesvc
+liveuploader -> imagesvc: /api/spb/v1/media/add/file wiki:4792344
+liveuploader -> livedessvc: SPB 汇报des资源缓存任务结束\n（wiki:297895354 dest_media_id）
+deactivate liveuploader
+activate livedessvc
+livedessvc -[#blue]> livedessvc: <color blue>update t_resource_upload_task\n\tstatus、dest_media_id
+livedessvc -[#blue]> livedessvc: <color blue>insert t_notify_task status=1
+livedessvc -> liveresourcesvc: PI 汇报资源缓存任务结束\n（wiki:297894544 dest_media_id）
+liveresourcesvc -[#blue]> liveresourcesvc: <color blue>insert / update t_resource_upload_result\n\tdest_media_id、last_check_time\n<color purple>（uniq_resource_media_id_type）
+liveresourcesvc -[#blue]> liveresourcesvc: <color blue>update t_resource_upload_summary\n\tstatus、resource_upload_result_id
+livedessvc -[#blue]> livedessvc: <color blue>update t_notify_task status=2
+livedessvc -> livedessvc: 定时重试（超过一定时长的任务）\n  t_notify_task.status=1
+deactivate livedessvc
+liveresourcesvc -> liveresourcesvc: 异步事件：通知课件资源缓存结果
+activate liveresourcesvc
+liveresourcesvc -> coursewaresvc: 汇报dest_media_id
+coursewaresvc -[#blue]> coursewaresvc: <color blue>update\n t_courseware_upload_result\n media_id
+deactivate liveresourcesvc
+@enduml

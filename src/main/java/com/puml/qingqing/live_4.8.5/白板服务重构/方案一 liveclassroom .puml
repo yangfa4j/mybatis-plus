@@ -1,0 +1,25 @@
+@startuml
+Actor C as "client" order 1
+participant A as "livebm" order 2
+participant B as "liveclassroom" order 3
+title: 方案一：整合服务至liveclassroom
+== 获取连接地址 ==
+C->A: 携带“房间id”请求连接地址
+A->A: 基于权重计算，挑选一台liveclassroom（如podA）
+A->B: 异步通知所挑选的liveclassroom启动消息处理协程
+return
+A->C: 返回直连某台liveclassroom（如podA）的地址
+
+== 直连被选中的liveclassroom流程 ==
+C->B: 客户端携带"房间id"直连liveclassroom
+B->A: 确认是否由本pod处理？
+return 是
+B->B: 内部启动协程处理该房间消息
+B->C: 连接成功，返回
+
+== 直连未被选中的liveclassroom流程 ==
+C->B: 客户端携带"房间id"直连liveclassroom
+B->A: 确认是否由本pod处理？
+return 否
+B->C: 连接失败，返回
+@enduml

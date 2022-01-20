@@ -1,0 +1,18 @@
+
+@startuml
+title 成长值获取场景-课后完成作业（接口）
+
+alt
+actor 学生
+
+alt 课后完成作业
+学生 -> 学生端: 提交未过期的作业成功
+学生端 -> livebff: 调用pt接口触发成长值增加事件
+livebff -> api服务: 校验调用pbff接口触发成长值增加事件
+note right
+    校验逻辑由api确认
+end note
+api服务 -> 学生端: response
+end
+
+@enduml

@@ -1,0 +1,27 @@
+
+@startuml
+title 成长值获取场景-下课（接口）
+
+alt
+
+actor 老师
+
+老师 -> 老师端: 点击下课完成下课流程
+老师端 -> 服务端: 调用下课接口
+note right
+    此处简化下课流程
+end note
+服务端 -> 学生端: 发送消息通知学生端下课
+学生端-> livebff: 调用pt接口触发成长值增加事件
+livebff -> livesvc: 调用pbff接口触发成长值增加事件
+livesvc -> livesvc: 校验，获取学生点赞/是否记笔记/是否标记重点
+note right
+    校验失败，错误码，前端处理是否提示
+end note
+
+livesvc -> api服务: 调用pi接口给学生增加成长值
+api服务 -> livesvc: response
+livesvc -> 学生端: response
+end
+
+@enduml

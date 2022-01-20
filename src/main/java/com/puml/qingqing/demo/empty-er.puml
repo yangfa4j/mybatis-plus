@@ -1,0 +1,78 @@
+@startuml
+' uncomment the line below if you're using computer with a retina display
+' skinparam dpi 300
+!define Table(name,desc) class name as "desc" << (T,#FFAAAA) >>
+' we use bold for primary key
+' green color for unique
+' and underscore for not_null
+!define primary_key(x) <b>x</b>
+!define unique(x) <color:green>x</color>
+!define not_null(x) <u>x</u>
+' other tags available:
+' <i></i>
+' <back:COLOR></color>, where color is a color name or html color code
+' (#FFAACC)
+' see: http://plantuml.com/classes.html#More
+hide methods
+hide stereotypes
+
+
+
+' entities
+
+'
+
+namespace 链接管理DEMO{
+    Table(t_link_template, "t_link_template\n(链接模板)"){
+        primary_key(id) INTEGER
+        not_null(link_name)
+        not_null(link_banner) VARCHAR[1024] 头图
+        not_null(is_deleted) TINYINT
+    }
+
+
+
+    Table(t_link_template_channel, "t_link_template_channel\n(链接渠道关系)"){
+        primary_key(id) INTEGER
+        not_null(template_id) INTEGER
+    }
+
+    Table(t_link_template_city, "t_link_activity_relation\n(链接活动关系)"){
+        primary_key(id) INTEGER
+        not_null(template_id) INTEGER
+    }
+
+    namespace 链接管理DEMO.活动{
+            Table(t_link_template_activity, "t_link_template_activity\n(链接包含的活动)"){
+                primary_key(id) INTEGER
+                not_null(template_id) INTEGER
+                not_null(activity_id) INTEGER
+                not_null(sort_no) INTEGER
+            }
+
+            Table(t_link_template_tag, "t_link_tag\n(链接 标签???)"){
+                primary_key(id) INTEGER
+                not_null(template_id) INTEGER
+                not_null(tag_id) INTEGER
+            }
+        链接管理DEMO.t_link_template "1" --> "*"  t_link_template_activity : template_id
+        t_link_template_activity  --  活动管理DEMO.t_social_activity : activity_id
+    }
+
+
+    Table(t_link_instance, "t_link_instance\n(链接 实例)"){
+        primary_key(id) INTEGER
+        not_null(TODO) VARCHAR[32]
+        not_null(TODO) INTEGER
+    }
+
+    t_link_instance "*" --> "1"  t_link_template : template_id
+
+    t_link_template "1" --> "*"  t_link_template_channel : template_id
+    t_link_template "1" --> "*"  t_link_template_city : template_id
+
+}
+
+
+
+@enduml

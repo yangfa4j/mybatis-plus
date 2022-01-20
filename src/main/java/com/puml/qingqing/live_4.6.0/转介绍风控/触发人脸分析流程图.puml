@@ -1,0 +1,35 @@
+@startuml
+title 人脸对比分析触发流程
+start
+:livingcenter回调livesvc回放生成（playback_finish）;
+if (数据库是否储存转介绍关系标识（t_live_user_extend extend_type=10）) then (是)
+    if (转介绍关系是否存在（t_live_user_extend extend_type=10）) then (存在)
+        if (任务成功计数>=成功配置数:t_live_user_extend extend_type=8) then (是)
+            :return;
+        else (否)
+            :创建异步任务;
+            note right:t_async_event type=1043
+            :扫描未开始的异步任务,开始处理;
+            if (调用接口，判断是否有转介绍关系,并记录到数据库 wiki:206898235) then (有)
+                if([1,3,5] a[i-1]<=实际课程计数<a[i] && 实际对比成功数<i) then (是)
+                    if (被对比方是否已有编码结果?) then (有)
+                        :调用liveias接口创建人脸对比分析任务;
+                    else (否)
+                        :找到被对比方的最后一节一对一回放成功的课程,并且视频暂时没有被人脸分析过;
+                        :调用liveias创建人脸分析任务;
+                    endif
+                else (否)
+                endif
+                :增加回放成功课程计数;
+                note left:回放课程计数 -- t_live_user_extend extend_type=7
+            else (否)
+            endif
+        endif
+    else (不存在)
+    endif
+else (否)
+    :创建异步任务;
+    note right:t_async_event type=1043
+endif
+end
+@enduml

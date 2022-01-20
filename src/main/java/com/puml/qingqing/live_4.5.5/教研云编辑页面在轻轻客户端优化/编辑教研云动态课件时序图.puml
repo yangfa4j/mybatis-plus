@@ -1,0 +1,84 @@
+@startuml
+==原编辑动态课件时序图==
+autonumber "<b>##. "
+"front-end" as front -> livesvc: /livesvc/api/h5pt/v1/courseware/trcloud/edit
+
+alt aibeike_courseware_interface_upgrade_switch open（教研云升级开关）
+    livesvc -> coursewaresvc: /coursewaresvc/api/pi\n/v2/courseware/repo/copy_trm_cloud_courseware
+else aibeike_courseware_interface_upgrade_switch close
+autonumber 2 "<b>##. "
+    livesvc -> coursewaresvc: /coursewaresvc/api/pi\n/v1/courseware/repo/copy_trm_cloud_courseware
+end
+
+coursewaresvc -> "jiaoyanyun\n(aibeike)" as jiaoyanyun: copyCloudCourseWare & getCloudCourseWareEditUrl
+
+livesvc -[#blue]> livesvc: update t_courseware_reference: \ncoursewareId、CoursewareReferenceStatus.UNSAVED
+
+livesvc --> front: response: \ndata: ...jiaoyanyun...&callbackUrl: \n/livesvc/api/pb/v1/courseware/trcloud/save\n?isNeedModify=0&qingqingRefId={encodeReferenceId}
+note right: isNeedModify=0 修改
+
+front -> jiaoyanyun: edit_url
+
+opt 不直接点击完成，而是进行预览后点击完成加入（需要获取编辑地址后重新返回编辑页面）
+    front -> livesvc: 入参：<font color=red>coursewareReferenceId\n/livesvc/api/h5pt/v1/courseware/trcloud/edit_url
+    note right
+        <color red><b>此处存在BUG：
+            <color red><b>通过coursewareReferenceId获取到的是原aibeike_courseware_id，
+            <color red><b>导致之后编辑保存的其实是原课件，而不是复制出来的新课件
+    end note
+    livesvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/get_cloud_courseware_edit_url
+    coursewaresvc -> jiaoyanyun: getCloudCourseWareEditUrl
+    livesvc --> front: response: \ndata: ...jiaoyanyun...&callbackUrl=\n/livesvc/api/pb/v1/courseware/trcloud/save\n?isNeedModify=0&qingqingRefId={encodeReferenceId}
+    front -> jiaoyanyun: jiaoyanyun/edit_url
+end
+
+jiaoyanyun -> livesvc: /livesvc/api/pb/v1/courseware/trcloud/save\n?isNeedModify=0&qingqingRefId={encodeReferenceId}
+
+livesvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/save_trm_cloud_courseware
+coursewaresvc -[#blue]> coursewaresvc: insert into t_courseware_repository
+coursewaresvc --> livesvc: response coursewareId
+
+livesvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/find_by_id
+livesvc -[#blue]> livesvc: delete t_courseware_reference
+livesvc -[#blue]> livesvc: insert into t_courseware_reference: \ncoursewareId、CoursewareReferenceStatus.FINISH
+
+livesvc -> liveroutersvc: /liveroutersvc/api/pi/v1/system_cmd/send_signal_to_user（coursewareCatalogRefresh）
+
+||50||
+
+
+==改版后编辑动态课件时序图==
+autonumber "<b>##. "
+create liveteachingsvc
+"front-end" as front -> liveteachingsvc: /liveteachingsvc/api/h5pt/v1/courseware/trcloud/edit
+
+liveteachingsvc -> coursewaresvc: /coursewaresvc/api/pi/v2/courseware/repo/copy_trm_cloud_courseware
+
+coursewaresvc -> "jiaoyanyun\n(aibeike)" as jiaoyanyun: copyCloudCourseWare & getCloudCourseWareEditUrl
+
+liveteachingsvc --> front: response: \nmedia_id: {aibeike_courseware_id}\nedit_url: ...jiaoyanyun...&callbackUrl=/liveteachingsvc/api/pb/v1/courseware/trcloud/save?isNeedModify=0&qingqingUserId={encodeUser}&qingqingRefId={encodeReferenceId}
+note right: isNeedModify=0 修改
+
+front -> jiaoyanyun: jiaoyanyun/edit_url
+
+opt 不直接点击完成，而是进行预览后点击完成加入（需要获取编辑地址后重新返回编辑页面）
+    front -> liveteachingsvc: 入参：<color red>aibeike_courseware_id、coursewareReferenceId</color><b>（复制出来的新aibeike_courseware_id，而coursewareReferenceId只做callbackUrl参数拼接使用）\n/liveteachingsvc/api/h5pt/v1/courseware/trcloud/edit_url
+    liveteachingsvc -> coursewaresvc: /coursewaresvc/api/pi/v1/aibeike/courseware/get_cloud_courseware_edit_url
+    coursewaresvc -> jiaoyanyun: getCloudCourseWareEditUrl
+    liveteachingsvc --> front: response: \nmedia_id: {aibeike_courseware_id}\nedit_url: ...jiaoyanyun...&callbackUrl=/liveteachingsvc/api/pb/v1/courseware/trcloud/save?isNeedModify=0&qingqingUserId={encodeUser}&qingqingRefId={encodeReferenceId}
+    front -> jiaoyanyun: jiaoyanyun/edit_url
+end
+
+jiaoyanyun -> liveteachingsvc: /liveteachingsvc/api/pb/v1/courseware/trcloud/save?isNeedModify=0\n&qingqingUserId={encodeUser}&qingqingRefId={encodeReferenceId}
+
+liveteachingsvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/save_trm_cloud_courseware
+coursewaresvc -[#blue]> coursewaresvc: insert into t_courseware_repository
+coursewaresvc --> liveteachingsvc: response coursewareId
+
+liveteachingsvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/find_by_id
+liveteachingsvc -[#blue]> liveteachingsvc: delete t_courseware_reference
+liveteachingsvc -[#blue]> liveteachingsvc: insert into t_courseware_reference: \ncoursewareId、CoursewareReferenceStatus.FINISH
+
+liveteachingsvc -> liveroutersvc: /liveroutersvc/api/pi/v1/system_cmd/send_signal_to_user\n（coursewareCatalogRefresh）
+
+@enduml

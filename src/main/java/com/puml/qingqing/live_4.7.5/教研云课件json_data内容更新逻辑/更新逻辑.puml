@@ -1,0 +1,26 @@
+@startuml 公有云文件替换流程图(阿里云为例)
+客户端 -> liveteachingsvc : 老师访问教研云动态或者静态课件(获取预览页或者课程绑定课件)
+liveteachingsvc -> mq : 发送mq消息到coursewaresvc
+mq -> coursewaresvc : coursewaresvc接收老师使用courseware_repository_id的消息
+coursewaresvc -> coursewaresvc : 检查redis中已进行检查并需要重传的课件数量,不超过配置值才能往下进行
+coursewaresvc -> coursewaresvc : 超过更新last_check_time
+coursewaresvc -> coursewaresvc : t_courseware_upload_result表新增last_check_time字段
+coursewaresvc -> coursewaresvc : 查看t_courseware_upload_result表中,version最大记录的last_check_time
+coursewaresvc -> coursewaresvc :和接受mq消息的时间进行差值比对
+coursewaresvc -> coursewaresvc :间隔时间不超过配置值(如一天),就不检查,更新last_check_time
+coursewaresvc -> coursewaresvc :超过配置值
+coursewaresvc -> playsvc : 拉取json_url对应的json_data
+coursewaresvc -> aibeike : 拉取json_data
+coursewaresvc -> coursewaresvc : 对比内容MD5(只需要下行带宽,能顶住)
+coursewaresvc -> coursewaresvc : 内容相同,改t_courseware_upload_result表的last_check_time字段
+coursewaresvc -> coursewaresvc : 内容不同 t_courseware_upload_result表新增一条记录,version = 此前最大的version + 1,发送异步任务,更新last_check_time
+coursewaresvc -> coursewaresvc : redis中已进行检查并需要重传的课件数量+1
+coursewaresvc -> coursewaresvcmq : 老逻辑
+coursewaresvcmq -> coursewaresvc : 老逻辑 
+coursewaresvc -> livedes : 老逻辑
+livedes -> liveuploader : 老逻辑
+liveuploader ->livedes: 老逻辑
+livedes -> coursewaresvc: 老逻辑,标记任务成功
+
+liveteachingsvc -> coursewaresvc : 获取教研云动静态课件内容时,默认取courseware_repo_id相同,version最大的一份课件的json_url
+@enduml

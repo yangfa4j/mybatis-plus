@@ -1,0 +1,48 @@
+@startuml
+==新增静态课件时序图==
+autonumber "<b>##. "
+"front-end" as front -> livesvc: /livesvc/api/h5pt\n/v1/courseware/paper/create
+
+livesvc -> coursewaresvc: /coursewaresvc/api/pi/v1/aibeike/paper/create
+coursewaresvc -> "jiaoyanyun\n(aibeike)" as jiaoyanyun: /paper/createPaper
+
+livesvc -> coursewaresvc: /coursewaresvc/api/pi/v1/aibeike/resource/url
+coursewaresvc -> jiaoyanyun: /jyCloud/queryResourceIndexUrl
+
+livesvc --> front: response: \nresource_url: ...jiaoyanyun...,\npaper_id: {paperId}
+front -> livesvc: /livesvc/api/h5pt/v1/courseware/paper/save
+
+livesvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/save_paper
+coursewaresvc -> jiaoyanyun: /paper/getCloudPaperInforById
+coursewaresvc -[#blue]> coursewaresvc: insert into t_courseware_repository
+coursewaresvc --> livesvc: response coursewareId
+
+livesvc -[#blue]> livesvc: insert into t_courseware_reference
+livesvc -> liveroutersvc: /liveroutersvc/api/pi/v1/system_cmd/send_signal_to_user（coursewareCatalogRefresh）
+
+||100||
+
+
+
+==编辑静态课件时序图==
+autonumber "<b>##. "
+"front-end" as front -> livesvc: /livesvc/api/h5pt/v1/courseware/paper/edit
+
+livesvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/copy_trm_cloud_static_courseware
+coursewaresvc -> "jiaoyanyun\n(aibeike)" as jiaoyanyun: /paper/copyCloudPaper
+coursewaresvc -> "jiaoyanyun\n(aibeike)" as jiaoyanyun: /paper/getOperatesPaperElementUrl
+
+livesvc --> front: response: \npaper_edit_url: ...jiaoyanyun...,\npaper_id: {paperId}
+front -> livesvc: /livesvc/api/h5pt/v1/courseware/paper/save
+
+livesvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/save_paper
+coursewaresvc -> jiaoyanyun: /paper/getCloudPaperInforById
+coursewaresvc -[#blue]> coursewaresvc: insert into t_courseware_repository
+coursewaresvc -[#blue]> coursewaresvc: insert into t_courseware_chain（课件链路信息）
+coursewaresvc --> livesvc: response coursewareId
+
+livesvc -[#blue]> livesvc: delete t_courseware_reference
+livesvc -[#blue]> livesvc: insert into t_courseware_reference
+livesvc -> liveroutersvc: /liveroutersvc/api/pi/v1/system_cmd/send_signal_to_user（coursewareCatalogRefresh）
+
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+title 课件转码mq降级到redis
+start
+: 课件上传完成，发送课件转码消息时;
+    : 读取配置，是否使用redis发送消息;
+    if(courseware_encode_massage_use_redis_swicth) then(true)
+        : 使用 redis 发送消息;
+    else(false)
+        : 使用 mq 发送消息;
+    endif
+end
+@enduml

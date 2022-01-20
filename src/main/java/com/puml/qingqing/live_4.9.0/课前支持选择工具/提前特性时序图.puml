@@ -1,0 +1,25 @@
+@startuml
+title 提前特性时序图
+participant 老师端 order 0
+participant livesvc order 1
+participant 学生端 order 7
+
+alt 正常流程
+老师端 -> livesvc : 备课阶段内进入教室
+livesvc -> livesvc: 确定课堂提前特性
+note right:备课阶段外则无特殊处理，备课阶段指课前30分钟内
+老师端 -> livesvc : 点击上课,获取提前特性
+老师端 -> 学生端 : 消息通知更新提前特性
+end
+
+alt 备课阶段之前进入教室
+老师端 -> livesvc : 备课阶段前进入教室
+note right:此时不会触发确认课堂提前特性逻辑，仅记录用户最新特性
+老师端 -> 老师端 :  一直未退出教室直至备课阶段
+老师端 -> livesvc : 调刷新提前特性接口
+老师端 -> livesvc : 确定课堂提前特性
+livesvc -> 老师端 : 返回课堂支持的提前特性
+老师端 -> livesvc : 点击上课,获取提前特性
+老师端 -> 学生端 : 消息通知更新提前特性
+end
+@enduml

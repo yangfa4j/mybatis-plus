@@ -1,0 +1,38 @@
+@startuml
+group 选择资料 / 继续选择 / 移除组合资料
+    "front-end" AS front -> liveteachingsvc: <color #green>wiki:213909573 新增入参without_callback_url\n/{h5|}pt/v1/courseware/trcloud/create
+    liveteachingsvc -> coursewaresvc: /pi/v4/aibeike/courseware/create_cloud_courseware
+    coursewaresvc -> TrCloud: /kejian/courseWare/createCloudCourseWare
+    coursewaresvc -> TrCloud: /kejian/courseWare/getCloudCourseWareEditUrl
+    coursewaresvc --> liveteachingsvc: return aibeike_courseware_id、edit_url
+    liveteachingsvc --> front: return aibeike_courseware_id、edit_url
+end
+
+group 编辑组合资料（上一步其实已经获取到edit_url）
+    front -> liveteachingsvc: wiki:257983562\n/{h5|}pt/v1/courseware/trcloud/edit_url_without_callbackUrl
+    liveteachingsvc -> coursewaresvc: /pi/v4/aibeike/courseware/get_cloud_courseware_edit_url
+    coursewaresvc -> TrCloud: /kejian/courseWare/getCloudCourseWareEditUrl
+    coursewaresvc --> liveteachingsvc: return edit_url
+    liveteachingsvc --> front: return aibeike_courseware_id、edit_url
+end
+
+group 完成编辑组合资料 / 完成 - 关闭编辑框（根据aibeike_courseware_id复制）
+    front -> liveteachingsvc: <color #green>wiki:276529863 入参aibeike_courseware_id</color>\n/{h5|}pt/v1/courseware/trcloud/copy
+    liveteachingsvc -> coursewaresvc: /pi/v4/aibeike/courseware/copy_cloud_courseware
+    coursewaresvc -> TrCloud: /kejian/courseWare/copyCloudCourseWare
+'    coursewaresvc -> TrCloud: /kejian/courseWare/getCloudCourseWareEditUrl
+    coursewaresvc --> liveteachingsvc: return aibeike_courseware_id、edit_url
+    liveteachingsvc --> front: return aibeike_courseware_id、edit_url
+end
+
+group 加入本节课
+    front -> liveteachingsvc: <color #green>wiki:257982578 新增入参combine_material_aibeike_courseware_id\n\t\t\t\t    <color #green>combine_material_name</color>\n/{h5|}pt/v1/live_order_course/add_resource_to_course
+    liveteachingsvc -> coursewaresvc: /pi/v1/aibeike/courseware/create_zip_cloud_courseware
+    liveteachingsvc -> coursewaresvc: /pi/v1/courseware/repo/add_trcloud_courseware_by_media_ids
+    coursewaresvc -[#blue]> coursewaresvc: <color blue>insert t_courseware_repository
+    coursewaresvc -[#blue]> coursewaresvc: <color blue>insert t_courseware_chain
+    coursewaresvc --> liveteachingsvc: return coursewareId
+    liveteachingsvc -[#blue]> liveteachingsvc: <color blue>insert t_courseware_reference</color>（save状态）
+    liveteachingsvc -[#blue]> liveteachingsvc: <color blue>insert t_live_order_course_courseware</color>（绑定到课程）
+end
+@enduml

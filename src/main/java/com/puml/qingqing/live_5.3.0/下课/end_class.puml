@@ -1,0 +1,36 @@
+@startuml
+title 下课流程
+actor 前端
+participant livesvc as live
+participant svc
+database db
+queue mq
+
+
+前端 -> live: PT 下课（wiki：6095531）
+live -> svc: PI 下课（wiki：6885294）
+return success
+live -> db: t_livecloud_lesson_v2 和 t_livecloud_sub_lesson_v2 标记end_time
+
+live -> db:异步事件 1007
+live -> mq:异步事件 1007
+
+live -> db:异步事件 1041
+live -> mq:异步事件 1041
+
+live -> mq:异步事件 1003
+
+live -> db:异步事件 1026
+live -> mq:异步事件 1026
+
+live -> db:异步事件 1031
+live -> mq:异步事件 1031
+
+live -> db:异步事件 1047
+live -> mq:异步事件 1047
+
+live -> mq:同步课件使用次数
+
+live --> 前端: 下课成功
+
+@enduml

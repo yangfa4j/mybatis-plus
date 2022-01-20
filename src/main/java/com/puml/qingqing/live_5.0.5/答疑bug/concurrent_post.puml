@@ -1,0 +1,26 @@
+@startuml
+Actor C as "user" order 1
+participant LIVE as "livesvc" order 2
+participant ANSWER as "answersvc" order 3
+
+title: 答疑课并发续课、下课bug
+
+C -> LIVE: continue_class
+activate LIVE
+LIVE -> LIVE: 校验课程（存在、下课等）
+LIVE -> ANSWER: continue_class（record_id）
+activate ANSWER
+ANSWER -> ANSWER: 生成一个新的record_id关联此答疑课，并把previous_record_id标记完成
+C->LIVE: end_class
+LIVE -> LIVE: 校验课程（存在、下课等）,找到课程对应的record_id
+LIVE -> ANSWER: end_class（旧record_id）
+ANSWER ->LIVE:continue_class返回
+LIVE -> LIVE: 续课成功，修改答疑课对应的record_id
+LIVE -> C: continue_class成功
+ANSWER -> ANSWER: 发现record_id已下课（续课时将previous_record_id标记完成），直接返回成功
+ANSWER ->LIVE: end_class返回
+deactivate ANSWER
+LIVE -> LIVE: 下课成功，修改答疑课以及v2表对应的状态
+LIVE -> C: end_class成功
+deactivate LIVE
+@enduml

@@ -1,0 +1,23 @@
+
+@startuml
+title 课前支持选择工具
+start
+: 用户进入教室;
+    : 更新redis缓存的用户支持特性;
+    if(预计上课时间前30分钟内) then(Y)
+        : 处理图片编辑特性;
+        if(课堂是否已有支持特性记录) then(Y)
+            : 不支持更新特性，无需处理;
+        else(N)
+            if(课堂对应所有用户是否都支持特性) then(Y)
+                : 新增支持特性记录;
+            else(N)
+                : 新增不支持特性记录;
+             endif
+         endif
+    else(N)
+        : 无特殊处理;
+    endif
+
+end
+@enduml

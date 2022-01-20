@@ -1,0 +1,26 @@
+@startuml
+title 学生/老师退出时间
+start
+: 下课时创建结算任务;
+: 调用router拿到该课程学生老师进入退出教室时间;
+partition 计算学生/老师退出时间 {
+if(进入房间集合？) then (空)
+    if(退出房间集合？) then (空)
+    :无退出时间;
+    else (非空)
+    :取最后一次退出时间;
+    endif
+else (非空)
+    if(退出房间集合？) then (空)
+    :取实际下课时间;
+    else (非空)
+        if(最后一次进入时间大于最后一次退出时间) then (大于)
+        :取实际下课时间;
+        else (小于)
+        :取最后一次退出时间;
+        endif
+    endif
+endif
+  }
+end
+@enduml

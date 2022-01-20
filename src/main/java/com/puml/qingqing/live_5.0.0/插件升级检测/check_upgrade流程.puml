@@ -1,0 +1,44 @@
+@startuml
+title check_upgrade流程
+start
+note left
+    t_app_upgrade_whitelist（白名单表）
+    t_app_upgrade_config（灰度策略表）
+end note
+: 客户端轮询调用，传入device_code，app_name,current_version;
+    if(在白名单表中是否包含该device_code)  then(在白名单中)
+        : 根据配置返回相应的升级策略;
+    else(不在白名单中)
+        if(查询此app_name对应的灰度策略) then(有)
+         if(对比此灰度策略redis中的升级用户数是否超过配置) then(true)
+                    if(对比redis的升级用户中是否已包含该device_code) then(false)
+                        :走全量逻辑;
+                    else(true)
+                        :直接返回相应的升级策略;
+                        end
+                    endif
+                else(false)
+                endif
+            partition 计算灰度比例逻辑 {
+            :根据配置的增量信息来计算出灰度比例;
+            :比例：initial_rate+(now-start_time)/(配置的刷新频率)*(配置的刷新频率)*(final_rate-initial_rate)/(end_time-start_time);
+            :如果当前时间已经大于增量结算时间，就更新表rate->final_rate，并清空增量相关配置;
+            }
+           if(根据device_code来判断是否在灰度比例中) then(在)
+                : 返回相应的升级策略;
+                : current_version与返回version版本不一致，将device_code存入此版本的redis中;
+                end
+           else(不在)
+           endif
+        else(无)
+        endif
+         partition 全量逻辑 {
+           if(查询此app_name对应的全量策略) then(有)
+               : 返回相应的升级策略;
+           else(无)
+        endif
+        }
+    endif
+end
+
+@enduml

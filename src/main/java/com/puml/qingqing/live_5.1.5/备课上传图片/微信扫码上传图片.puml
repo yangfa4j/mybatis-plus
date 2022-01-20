@@ -1,0 +1,24 @@
+@startuml
+title 微信扫码上传
+participant 授课端
+participant 微信
+participant "cos/oss" AS oss
+participant imgsvc
+授课端 -> livesvc: （wiki:10485763 获取share_code）\n/{h5|}pt/v1/live_order_course/get_image_transmission_key
+授课端 -> imgsvc: （wiki:2624673 生成二维码）\n/pb/v1/qrcode/action/generate
+
+微信 -> 授课端: 扫码
+微信 -> livesvc: （wiki:9936623 获取课程信息）\n/pb/v1/live_order_course/image_transmission/pre_image_transmission
+note right 微信
+点击<b>确认上传</b>时，校验是否课前，并给出可添加图片数量
+剩余数量 = LiveConsole:live_order_course_bind_image_maximum - 已选学生图片数 - 已绑老师图片数
+end note
+微信 -> liveteachingsvc: <color #green>（wiki:288327197 PB 学习资料图片上传检查）\n<color #green>/pb/v1/study_material/image_upload_check</color>（入参live_order_course_image_transmission_key）
+微信 -> livesvc: （<color #red>PB</color> wiki:288326978 多地址文件上传前获取签名）\n<color #green>/pb/v1/image/object_upload_auth
+create oss
+微信 -> oss: 上传图片
+微信 -> imgsvc: /pb/v1/media/add/image（wiki:11574780）
+微信 -> liveteachingsvc: <color #green>（wiki:288327299 PB 学习资料图片批量绑定课程）\n<color #green>/pb/v1/study_material/images_bind_course</color>（入参live_order_course_image_transmission_key）
+liveteachingsvc -[#blue]> liveteachingsvc: insert t_general_file\n\t t_live_order_course_general_file
+liveteachingsvc --> 授课端: mqtt sendSignal subCmdType:20（老师上传图片完成）
+@enduml

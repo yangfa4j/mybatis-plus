@@ -1,0 +1,30 @@
+@startuml
+title 切换机房问题
+participant console
+participant router
+participant livebmsvc
+participant livesvc
+participant clear
+
+==切换机房==
+console -> router:PI 运维发起切换机房请求(wiki=10506995)
+router -> router: 未初始化机房的初始化为toGlobalZone\n已初始化的走下面逻辑
+router->livesvc:PI 批量切换机房上传白板消息(<color Lime>wiki=323159094</color>)
+livesvc->livesvc: 已下课的不处理，未上课的不初始化message\n校验t_live_order_course_message_file \n 表中有 toGlobalZone 没上传成功的文件 忽略不返回 \n 没有就插入fromGlobalZone的记录 返回相应的message is
+livesvc-->router:返回message信息(未上课的只返回live_order_course_id，已上课且可以切换的同时返回message_id)
+router->router:修改t_live_order_course_connect_info，插入t_live_order_course_connect_log
+router->livebmsvc:批量通知客户端切换机房（异步MQ通知room->broker）
+alt 返回成功
+livebmsvc-->router: success
+router->livesvc:PI 批量初始化白板上传状态(<color Lime>wiki=323158504</color>)
+return
+router->clear:PI 批量上传白板消息接口(wiki=10503885)
+return
+else 返回失败
+livebmsvc-->router: fail
+end
+router --> console: 返回成功
+note over console,router #FF0000: 现存问题：网络出现问题时切换，无法再切换回原机房
+
+
+@enduml

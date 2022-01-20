@@ -1,0 +1,75 @@
+@startuml
+title 老师自我介绍
+participant 前端
+participant liveteacingsvc as live
+participant livecoursebff as bff
+participant api
+participant playsvc
+participant imgsvc
+== 进入备课页面 ==
+前端 -> live: PT 备课详情接口
+alt t_live_order_course_general_file 绑定过
+live -> 前端: 直接返回绑定图片信息(image_id)，可预览
+else 未绑定，t_general_file 有图
+live -> 前端: 返回 t_general_file 最新图片信息(image_id)，可预览
+else 未绑定，t_general_file 无图
+live -> api: 获取自我介绍基础信息
+return 自我介绍基础信息
+live -> 前端: 自我介绍基础信息（不可预览）
+end
+
+== 点击预览 ==
+前端 -> live: PT 根据qingqing_live_order_course_id 获取老师自我介绍图片
+alt t_live_order_course_general_file 绑定过
+live ->playsvc: 绑定的image_id 获取pi图片信息
+return 图片信息
+else 未绑定，t_general_file 有图
+live ->playsvc: 绑定的image_id 获取pi图片信息
+return 图片信息
+end
+live -> 前端: 图片信息
+
+== 点击生成/刷新 ==
+前端 -> live: PT 获取老师自我介绍内容接口\n(传入刷新标志，记录刷新次数)
+alt 刷新次数超过限制（默认50一天）
+live -> 前端: 次数限制报错
+else 没超过限制
+live->api: 获取自我介绍基础信息
+return 自我介绍基础信息
+live -> imgsvc: PI 根据模板类型申请access_key
+imgsvc -> live: access_key
+live -> 前端: 自我介绍基础信息(access_key)
+end
+alt 自我介绍基础信息完善
+前端 -> imgsvc: PB 生成图片接口(传入access_key)
+return 图片流信息
+前端 -> livesvc: 多地址文件上传前获取签名(wiki:288326978)
+return 签名
+create oss
+前端 -> oss: 上传图片
+return
+前端 -> imgsvc: /pb/v1/media/add/image（wiki:11574780）
+return image基础信息
+前端 -> live: PT 绑定老师自我介绍图片接口
+return 保存图片到 t_general_file
+else 自我介绍基础信息完善不完善
+前端 -> live: PT 清除老师自我介绍图片接口
+return t_general_file标记老师自我介绍图片删除
+end
+
+== 保存 ==
+前端 -> live: PT 完成备课接口,传入image_id
+live->live: 未传入image_id：取t_general_file 表最新的图片绑定，若无解绑所有图片\n传入image_id：对比绑定的图片是否相同，相同不做改动，不同用最新的
+return 保存最新老师自我介绍图片到t_live_order_course_general_file
+
+== 课中使用 ==
+alt 直接调用liveteachingsvc
+前端 -> live: PT 获取课堂绑定的资料（wiki：287868140）
+return 资料信息（兼容自我介绍，做开关是否返回）
+else 调用livecoursebff
+前端 -> bff: PT 上课课程信息资源汇总接口（wiki：280166897）\nPT 批量获取课件详情接口（wiki：280166693）
+bff-> live: PBFF 获取课堂绑定的资料（wiki：287868148）
+return 资料信息（兼容自我介绍，做开关是否返回）
+bff --> 前端: 资料信息（兼容自我介绍）
+end
+@enduml

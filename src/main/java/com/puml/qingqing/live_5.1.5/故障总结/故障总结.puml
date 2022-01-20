@@ -1,0 +1,38 @@
+@startuml
+title 故障总结
+start
+:出现故障;
+:定位异常服务;
+split
+   :报警等可预见的异常;
+   :可定位到服务接口级别直接在日志看板上看日志;
+   :结合代码逻辑排查;
+   :结合紧急程度决定直接拉分支修复还是跟随版本修复;
+end
+split again
+   :来自求助的异常;
+   fork
+      :上课相关（livesvc、白板服务等）;
+   fork again
+      :课表相关（livesvc、livebff等）;
+   fork again
+      :课件相关（liveteaching、courseware等）;
+   fork again
+      :回放录制相关（liverres、livingcenter等）;
+   end fork
+   :在LB上查看相关服务错误飙高的接口;
+   :日志看板上查看相关error日志定位问题;
+   :可能会出现底层服务引发的级联报错，需要从上层服务的报错定位到下层服务的接口问题;
+   :根据代码分析是来自自身代码错误引起的还是第三方报错（svc、公有云、教研云等）引起的;
+   split
+   :自身代码错误;
+   :结合紧急程度决定直接拉分支修复还是跟随版本修复(一般紧急);
+   end
+   split again
+   :第三方问题，需紧急联系第三方人员帮忙修复解决;
+   split again
+   :网络或中间件（mq、redis、zk等）问题,联系运维帮忙解决;
+   end split
+   :如可以临时加上兼容逻辑（异常时返回默认值）就紧急优化上线（代码设计时对于重要接口需做好降级）;
+    end
+@enduml

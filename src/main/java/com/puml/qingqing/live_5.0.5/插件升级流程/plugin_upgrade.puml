@@ -1,0 +1,27 @@
+@startuml
+Actor C as "客户端" order 1
+participant ap as "appcenter" order 2
+database oss as "OSS" order 3
+database redis as "redis" order 4
+participant play as "playsvc" order 5
+
+title: 插件升级流程
+
+C -> ap: 插件升级检测（check_upgrade）
+activate ap
+redis-> ap: 根据检测到需要升级的版本拉取json串
+alt redis中无json串
+ap-> oss: 根据检测到需要升级的版本拉取json串
+activate oss
+oss --> ap: json串
+deactivate oss
+ap->redis: 缓存此版本对应的json串
+end
+ap --> C:根据配置返回需要升级的版本的json串
+deactivate ap
+C -> ap: 获取插件的下载地址
+activate ap
+ap -> play: 根据channel和相对地址获取带有效时间的地址
+play --> ap: 插件地址
+return 返回带有效时间的下载地址
+@enduml

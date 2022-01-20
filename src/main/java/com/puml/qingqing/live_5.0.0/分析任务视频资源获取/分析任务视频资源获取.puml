@@ -1,0 +1,21 @@
+@startuml
+title 分析任务视频资源流转
+participant 业务服务 order -1
+participant liveias order 0
+participant livescheduler order 1
+participant worker order 6
+participant playsvc order 7
+
+业务服务 -> liveias : 创建分析任务
+liveias -> livescheduler: 根据media_ids获取global_zone信息+是否跨机房
+
+liveias -> k8s : 提交job
+k8s -> worker : worker启动
+worker -> liveias : 调start接口获取media_ids信息
+worker -> playsvc : 根据media_ids查询视频下载地址
+worker -> worker : 存在有效地址则继续分析，不存在则直接结束分析
+note right: 有效地址指 不允许跨机房分析情况下的内网地址 + 允许跨机房分析情况下的 公网地址
+
+worker -> liveias : 汇报分析结束
+
+@enduml

@@ -1,0 +1,86 @@
+@startuml
+==原新增动态课件时序图（v2接口)==
+autonumber "<b>##. "
+"front-end" as front -> livesvc: /livesvc/api/h5pt\n/v2/courseware/trcloud/create
+
+livesvc -[#blue]> livesvc: insert into t_courseware_reference \n（CoursewareReferenceStatus.INIT）
+
+alt aibeike_courseware_interface_upgrade_switch open（教研云升级开关）
+    livesvc -> coursewaresvc: /coursewaresvc/api/pi\n/v2/courseware/repo/create_cloud_courseware
+    coursewaresvc -[#blue]> coursewaresvc: insert into t_courseware_repository
+else aibeike_courseware_interface_upgrade_switch close
+autonumber 3 "<b>##. "
+    livesvc -> coursewaresvc: /coursewaresvc/api/pi\n/v1/courseware/repo/create_cloud_courseware
+    coursewaresvc -[#blue]> coursewaresvc: insert into t_courseware_repository
+end
+
+coursewaresvc -> "jiaoyanyun\n(aibeike)" as jiaoyanyun: createCloudCourseWare & getCloudCourseWareEditUrl
+
+livesvc -[#blue]> livesvc: update t_courseware_reference: \ncoursewareId、CoursewareReferenceStatus.UNSAVED
+
+livesvc -> liveroutersvc: /liveroutersvc/api/pi/v1/system_cmd/send_signal_to_user（coursewareCatalogRefresh）
+
+livesvc --> front: response: \nedit_url: ...jiaoyanyun...&callbackUrl=\n/livesvc/api/pb/v1/courseware/trcloud/save\n?isNeedModify=1&qingqingRefId={encodeReferenceId},\ncourseware_reference_id: {referenceId}
+note right: isNeedModify=1 新增
+front -> jiaoyanyun: jiaoyanyun/edit_url
+
+opt 不直接点击完成，而是进行预览后点击完成加入（需要获取编辑地址后重新返回编辑页面）
+    front -> livesvc: 入参：<font color=red>coursewareReferenceId</font>\n（新创建的coursewareReferenceId）\n/livesvc/api/h5pt/v1/courseware/trcloud/edit_url
+    livesvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/get_cloud_courseware_edit_url
+    coursewaresvc -> jiaoyanyun: getCloudCourseWareEditUrl
+    livesvc --> front: response: \ndata: ...jiaoyanyun...&callbackUrl=\n/livesvc/api/pb/v1/courseware/trcloud/save\n?<color red>isNeedModify=0</color>&qingqingRefId={encodeReferenceId}
+    note right
+            <color red><b>此处存在问题：
+                <color red><b>isNeedModify=0表示的是修改场景，后续走的是修改保存流程
+                虽然并不影响课件创建最终结果，只是多了条标记删除的冗余数据
+    end note
+    front -> jiaoyanyun: jiaoyanyun/edit_url
+end
+
+jiaoyanyun -> livesvc: /livesvc/api/pb/v1/courseware/trcloud/save?isNeedModify=1&qingqingRefId={encodeReferenceId}
+livesvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/save_trm_cloud_courseware
+coursewaresvc -[#blue]> coursewaresvc: update t_courseware_repository: \n\t\tpages、has_remark
+coursewaresvc --> livesvc: response coursewareId
+
+livesvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/find_by_id(coursewareName)
+livesvc -[#blue]> livesvc: update t_courseware_reference: \ncoursewareId、coursewareName、CoursewareReferenceStatus.FINISH
+livesvc -> liveroutersvc: /liveroutersvc/api/pi/v1/system_cmd/send_signal_to_user（coursewareCatalogRefresh）
+
+||50||
+
+
+
+
+==改版后新增动态课件时序图（沿用v1接口）==
+autonumber "<b>##. "
+create liveteachingsvc
+"front-end" as front -> liveteachingsvc: /liveteachingsvc/api/h5pt/v1/courseware/trcloud/create
+
+liveteachingsvc -> coursewaresvc: /coursewaresvc/api/pi/v3/courseware/repo/create_cloud_courseware
+
+coursewaresvc -> jiaoyanyun: createCloudCourseWare & getCloudCourseWareEditUrl
+
+liveteachingsvc --> front: response: \nmedia_id: {aibeike_courseware_id}\nedit_url: ...jiaoyanyun...&callbackUrl: \n/liveteachingsvc/api/pb/v1/courseware/trcloud/save\n?isNeedModify=1&qingqingUserId={encodeUser}&folderId={folderId}
+note right: isNeedModify=1 新增
+
+front -> jiaoyanyun: jiaoyanyun/edit_url
+
+opt 不直接点击完成，而是进行预览后点击完成加入（需要获取编辑地址后重新返回编辑页面）
+    front -> liveteachingsvc: 入参：<color red>aibeike_courseware_id、folderId</color><b>（刚创建的aibeike_courseware_id）\n/liveteachingsvc/api/h5pt/v1/courseware/trcloud/edit_url
+    liveteachingsvc -> coursewaresvc: /coursewaresvc/api/pi/v1/aibeike/courseware/get_cloud_courseware_edit_url
+    coursewaresvc -> jiaoyanyun: getCloudCourseWareEditUrl
+    liveteachingsvc --> front: response: \nmedia_id: {aibeike_courseware_id}\nedit_url: ...jiaoyanyun...&callbackUrl=/liveteachingsvc/api/pb/v1/courseware/trcloud/save?isNeedModify=1&qingqingUserId={encodeUser}&folderId={folderId}
+    front -> jiaoyanyun: jiaoyanyun/edit_url
+end
+
+jiaoyanyun -> liveteachingsvc: /liveteachingsvc/api/pb/v1/courseware/trcloud/save?isNeedModify=1\n&qingqingUserId={encodeUser}&folderId={folderId}
+
+liveteachingsvc -> coursewaresvc: /coursewaresvc/api/pi/v1/courseware/repo/save_trm_cloud_courseware
+coursewaresvc -[#blue]> coursewaresvc: insert into t_courseware_repository
+coursewaresvc --> liveteachingsvc: response coursewareId
+
+liveteachingsvc -[#blue]> liveteachingsvc: insert into t_courseware_reference: \ncoursewareId、CoursewareReferenceStatus.FINISH
+
+liveteachingsvc -> liveroutersvc: /liveroutersvc/api/pi/v1/system_cmd/send_signal_to_user\n（coursewareCatalogRefresh）
+
+@enduml

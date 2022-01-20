@@ -1,0 +1,20 @@
+@startuml
+title 课件纠错
+actor 前端
+participant livebff
+participant trmapi
+participant trsectionsvc
+
+
+==提交纠错==
+前端 -> livebff:PT 提交问卷答案(新)\n courseware_id,courseware_edition_id,答题内容
+livebff -> trmapi: PI 获取问卷答题卡(wiki=130842785)\n courseware_id
+return survey_answer_card_id,token
+livebff -> trmapi: PB 根据答题卡id提交问卷接口(wiki=128910510)\n survey_answer_card_id,token,答题内容
+return
+livebff -> trsectionsvc: PI 课件纠错汇报接口(wiki=130842785)\n courseware_edition_id,survey_answer_card_id
+return
+livebff --> 前端:提交成功
+
+
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+start
+:查询连接信息;
+if (has live_order_course_id ?) then (\nno)
+    if (student user && student_zone_config.globalZone exist ?) then(no )
+        :live_city_zone.effect_zones<b>[</b><color red>user.city_id</color><b>]</b>;
+    else ( yes)
+        :student_zone_config.globalZone;
+    endif
+elseif (has t_live_order_course_connect_info（已有课程连接信息）?) then (\nno)
+    if (student_zone_config.globalZone exist?) then(no\t\t)
+        if (\n\tlive_city_zone.effect_zones<b>[</b><color red>course.city_id</color><b>]</b> \nover max_room_count  ||  over max_room_connect（拥挤）?\n) then (\n\n\n\n\nno   ||   all global_zone over max limit)
+            :live_city_zone.effect_zones<b>[</b><color red>course.city_id</color><b>]</b>;
+        else ( yes)
+            :random live_global_zones.effect_zones（剔除以上拥挤zone）;
+        endif
+    else (\tyes)
+        :student_zone_config.globalZone;
+    endif
+elseif (live_global_zones.uneffect && unstart course && nonmember（需要切换机房）?) then (\nno)
+    :t_live_order_course_connect_info.global_zone;
+else (\t\tyes)
+    if (\n\tlive_city_zone.effect_zones<b>[</b><color red>course.city_id</color><b>]</b> \nover max_room_count  ||  over max_room_connect（拥挤）?\n) then (\n\n\n\n\nno   ||   all global_zone over max limit)
+                :live_city_zone.effect_zones<b>[</b><color red>course.city_id</color><b>]</b>;
+            else ( yes)
+                :random live_global_zones.effect_zones（剔除以上拥挤zone）;
+            endif
+endif
+:global_zone;
+end
+@enduml

@@ -1,0 +1,25 @@
+
+@startuml
+title 课件内容持久化时序图
+liveteaching -> courseware_svc: 新建/编辑课件(保存场景)
+
+coursewaresvc -> coursewaresvc: 本地异步事件处理
+coursewaresvc -> quizsvc: 创建课件持久化任务
+coursewaresvc-> coursewaresvc: 标记异步事件完成
+quizsvc -> quizsvc: 过滤已存在试题,对于不存在的试题初始化t_quiz记录并创建异步事件
+
+quizsvc -> quizsvc:  内部异步触发保存试题任务
+alt 异步保存试题
+quizsvc -> image: 题目上传oss申请key
+quizsvc -> oss: 上传oss
+quizsvc -> image: 上传结果汇报
+quizsvc -> quizsvc: 试题的media_id保存
+quizsvc -> quizsvc: 相关数据落库（t_quiz_unique_relation）
+end
+
+note right
+    uniq_quiz_id:去掉element_id/que_id/paper_id
+                以及带此类id的url之后计算得出的md5
+    complete_quiz_id:完整试题对应的md5
+end note
+@enduml

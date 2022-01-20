@@ -1,0 +1,19 @@
+@startuml
+title 人脸分析整体流程
+participant livingcenter order 0
+participant livesvc order 1
+participant referralsvc order 7
+participant liveias order 3
+participant livehfaw order 6
+
+livingcenter -> livesvc : 回放生成成功，1v1课程生成异步人脸编码任务
+note right:playback_finish接口
+livesvc --> livesvc : 异步任务处理
+note right:t_async_event
+livesvc <--> referralsvc : 获取学生的介绍人
+livesvc --> livesvc : 根据规则判断学生是否需要继续做对比分析,以及需要的分析参数
+livesvc --> liveias : 创建人脸编码对比分析任务
+liveias --> livehfaw: 处理分析任务
+livehfaw --> liveias: 返回分析结果
+liveias --> livesvc: 人脸编码分析和人脸对比分析结果汇报
+@enduml

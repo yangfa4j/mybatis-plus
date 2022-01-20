@@ -1,0 +1,18 @@
+@startuml
+title 获取试题信息时序图
+前端 -> notesvc:获取试题信息
+notesvc -> quizsvc:获取试题信息访问地址
+note right: 公有云地址/liveresourcesvc服务接口url
+
+notesvc -> 前端: 返回试题访问url
+前端 -> 公有云 : 获取试题具体信息（优先）
+alt 公有云上传未完成
+前端 -> liveresourcesvc : 获取试题具体信息
+liveresourcesvc -> quizsvc : 调接口获取试题具体信息
+quizsvc -> quizsvc : 查mongodb获取试题信息
+quizsvc -> liveresourcesvc : 返回response
+liveresourcesvc -> 前端 : 返回response
+end
+
+@enduml
+

@@ -1,0 +1,31 @@
+@startuml 课堂灰度麒麟课件流程
+
+== 以下部分给在线开发看 ==
+
+== 课堂需要添加的逻辑 ==
+
+coursewaresvc->coursewaresvc:t_courseware_repository_tr_info新增转换状态的字段
+
+== 课堂需要转换的教研云课件取数逻辑 ==
+
+coursewaresvc->coursewaresvc:t_courseware_repository表中type = 5或者8,并且t_courseware_repository_tr_info表缺少数据或者未开始进行转换的数据
+
+== 课堂侧教研云课件获取不同预览地址的逻辑 ==
+
+coursewaresvc->liveresourcesvc:，没有tr_info表数据的情况下,基于t_courseware_repository表中的media_id和type字段,从liveresource获取教研云预览或者编辑地址
+
+coursewaresvc->trsectionsvc:基于t_courseware_repository取t_courseware_repository_tr_info表的数据,如果有tr_info的数据,那么可以基于edition_id从trsectionsvc取教研云的预览或者编辑地址
+
+coursewaresvc->trsectionsvc:基于t_courseware_repository取t_courseware_repository_tr_info表的数据,如果转换完成,那么基于edition_id从trsectionsvc取轻轻课件的预览或者编辑地址
+
+== 课堂侧白名单逻辑 ==
+
+liveteachingsvc->coursewaresvc:从coursewaresvc获取课件信息,包含t_courseware_repository_tr_info表的数据
+
+liveteachingsvc->liveteachingsvc:PT接口基于用户身份和白名单做过滤,决定是否返回麒麟课件,以及麒麟课件是否能和课程绑定,PI接口不做限制
+
+liveteachingsvc->liveteachingsvc:课前某个时间,前端汇报师生的版本,后端做过滤,是否课程中的麒麟课件需要返回教研云预览格式
+
+liveteachingsvc->liverouter:不能支持麒麟格式的话,转发消息
+
+@enduml

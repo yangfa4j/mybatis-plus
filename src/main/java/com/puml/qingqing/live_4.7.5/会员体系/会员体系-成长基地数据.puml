@@ -1,0 +1,28 @@
+
+@startuml
+title 成长基地时序图（渲染数据接口）
+
+客户端 -> livebff: 调用成长基地数据信息pt接口
+
+alt 并行调用接口获取用户动态数据
+livebff -> api服务: 调用api会员服务Pbff接口获取用户会员简要信息
+livebff -> api服务: 调用api会员服务pbff获取等级权益及用户会员权益
+
+note right
+    用户相关信息通过此接口返回
+end note
+end
+livebff -> livebff: 组装数据
+livebff -> 客户端: response
+
+== 分割线 ==
+客户端 -> livebff: 调用成长基地数据信息cpb接口
+alt 调用cpb接口获取静态数据
+livebff -> api服务: 调用api会员服务pi接口获取成长方式及规则
+
+note right
+    规则等静态资源通过cpb接口走cdn
+end note
+livebff -> 客户端: response
+
+@enduml

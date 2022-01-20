@@ -1,0 +1,23 @@
+@startuml
+(*)-->"携带`房间id`连接到livebroker"
+If "已知存在liveroom实例处理该房间消息" then
+--> [Yes] "发送消息到该liveroom实例的redis队列"
+    If "pop消息，确认该房间消息正在被本liveroom实例处理"
+    --> [Yes]" 正常转发该消息到对应livebroker"
+    else
+    -->[No] "（竞争）申请处理该房间消息的token"
+        If"获取（竞争）token成功"
+        -->使用指定线程处理消息
+        note left
+        线程Id=总线程数%roomId最后一位
+        endnote
+        -->结束
+        else
+        -->触发异常metric汇报并退出
+        Endif
+    Endif
+else
+-->[NO]"广播消息到通用topic"
+Endif
+-->(*)
+@enduml

@@ -1,0 +1,22 @@
+
+@startuml
+title 成长基地（操作接口）
+
+alt 成长值记录
+用户 -> 客户端: 点击"成长值记录"
+客户端 -> livebff: 调用pt接口查询当前学生成长值记录列表
+livebff -> api服务: 调用api会员服务 pbff 获取用户成长值明细
+api服务 -> livebff: response
+livebff -> 客户端: response
+end
+== 分割线 ==
+
+alt 使用/取消使用勋章
+用户 -> 客户端: 点击勋章下方"使用"/"取消使用"
+客户端 -> livebff: 调用pt接口更新学生勋章使用状态
+livebff -> api服务: 调用api物品服务pbff接口更新学生勋章使用状态
+api服务 -> livebff: response
+livebff -> 客户端: response
+end
+
+@enduml

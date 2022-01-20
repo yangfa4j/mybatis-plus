@@ -1,0 +1,21 @@
+@startuml
+"hf-quizservice" as quizservice -> livesvc: wiki: 76218618\n/livesvc/api/hfpi/v1/courseware/need_sync
+livesvc -> livesvc: 定时任务扫描未同步海风静态课件
+livesvc -> coursewaresvc: wiki: 76219353\n/coursewaresvc/api/pi/v1/courseware/repo/add_or_update_hf_courseware
+coursewaresvc -> livequizsvc: wiki: 231997825\n/livequizsvc/api/pi/v1/quiz/sync_hf_courseware_quiz
+livequizsvc -[#blue]> livequizsvc: insert t_async_event event_type:1046
+livequizsvc -> MQ: 发送异步事件消息
+livequizsvc <- MQ: 监听异步事件消息
+livequizsvc -> quizservice: /courseware/coursewareBriefInfo（wiki: 228197251）
+quizservice --> livequizsvc: return 课件简要信息，包含quizId-type列表
+livequizsvc -[#blue]> livequizsvc: insert t_hf_teacher_lesson_module_version\n\t t_sync_hf_quiz_task（list）\n\t t_async_event event_type:1045（list）
+livequizsvc -> MQ: 发送异步事件消息...（多个，每道题一个消息）
+livequizsvc -[#blue]> livequizsvc: update t_async_event status=2
+livequizsvc <- MQ: 监听异步事件消息
+livequizsvc -[#blue]> livequizsvc: update t_sync_hf_quiz_task status=1
+livequizsvc -> quizservice: /questions/getQuizDetail（递归查询至type!=2）（wiki: 234652778）
+quizservice --> livequizsvc: return 题目详情（包含所有索引层级题目信息）
+livequizsvc -[#blue]> livequizsvc: insert t_hf_home_work_detail_info（2作业）\n\t 或t_hf_knowledge（3梳理/4定位）\n\t 或t_hf_quiz_change（6自定义题目）\n\t 或t_hf_student_quiz（6学生自定义题目 quizId长度9位）\n\t 或t_hf_question_content（1题目、5白板、\n\t\t7组合、8好未来、9好未来自定义题目）\n update t_sync_hf_quiz_task status
+livequizsvc -[#green]> livequizsvc: insert mongo（content）
+livequizsvc -[#blue]> livequizsvc: update t_async_event status=2
+@enduml

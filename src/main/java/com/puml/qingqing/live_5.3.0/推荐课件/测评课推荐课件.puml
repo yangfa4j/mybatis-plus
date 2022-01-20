@@ -1,0 +1,27 @@
+@startuml
+title 测评课推荐作业
+start
+: 前端调用测评课自动绑定作业接口（liveteachingsvc 新）;
+: liveteachingsvc 调用 api 查询测评课备课时设置的课程内容id;
+if (有无课程内容id) then (无课程内容id)
+: liveteachingsvc 调用 api 查询测评课的初始课程内容ids（建课时设置的）;
+    if (课程内容ids数量) then (0个或多个课程内容id)
+        end
+    else(单个课程内容id)
+    endif
+    else(有课程内容id)
+endif
+:查询t_live_order_course_extend表 已经绑定过的课程内容id;
+ if (该课程内容id是否绑定过) then (已绑定过)
+        end
+    else(未绑定过)
+    :调用livesearchsvc的接口查询推荐课件;
+     if (推荐课件是否已与课程绑定) then (已绑定)
+        :t_live_order_course_extend表新增课程内容id;
+      else(未绑定过)
+      :走课件商场直接加入课堂流程加入课堂（落库t_live_order_course_courseware表并标记来源是测评课推荐）;
+      :t_live_order_course_extend表新增课程内容id;
+         endif
+    endif
+end
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+==原在线课课程求助流程==
+"front-end" as front -> livesvc: /livesvc/api/{h5|}pt/v2/livecloud/live_order_course_help（前端目前仍使用v1接口）
+livesvc -[#blue]> livesvc: insert t_live_order_course_help\n\t t_live_sub_order_course_help（list）
+livesvc -[#blue]> livesvc: insert t_async_event event_type:1002
+livesvc -> MQ: 发送异步事件消息
+note right: 补偿：基于ZK扫描失败事件重发消息
+MQ -> tcssvc: 监听到异步事件消息
+note left: <b>问题：若MQ发生故障，求助任务将无法得到分配
+tcssvc -[#blue]> tcssvc: select t_live_order_course_help
+tcssvc -> redis: rpop 在线客服 from zset: $env:tcs:onlineUserQueue
+redis --> tcssvc: return userId
+tcssvc -[#blue]> tcssvc: insert t_live_order_course_help_follow_log\nupdate t_live_order_course_help follow_user_id、follow_status=WAITING
+tcssvc -> redis: lpush userId to list: $env:tcs:onlineUserQueue
+livesvc -[#blue]> livesvc: insert t_general_file（求助图片list）
+||100||
+
+
+
+==优化后在线课课程求助流程==
+"front-end" as front -> livesvc: /livesvc/api/{h5|}pt/v2/livecloud/live_order_course_help（前端目前仍有使用v1接口）
+livesvc -[#blue]> livesvc: insert t_live_order_course_help\n\t t_live_sub_order_course_help（list）\n\t t_general_file（求助图片list）
+livesvc -[#blue]> livesvc: insert t_live_sync_task ref_type:10
+note right:创建同步任务调用tcssvc分配求助任务接口，定时任务扫描补偿失败任务
+livesvc -> tcssvc: /tscsvc/api/pi/v1/live_order_course/distribution_help_task
+note left: <b>同步调用
+tcssvc -[#blue]> tcssvc: select t_live_order_course_help
+tcssvc -> tcssvc: 校验求助任务状态（幂等操作，对于已分配求助任务不再分配）
+tcssvc -> redis: rpop 在线客服 from list: $env:tcs:onlineUserQueue
+redis --> tcssvc: return userId
+tcssvc -[#blue]> tcssvc: insert   t_live_order_course_help_follow_log\nupdate t_live_order_course_help follow_user_id、follow_status=WAITING
+tcssvc -> redis: lpush userId to list: $env:tcs:onlineUserQueue
+
+note left livesvc: live_5.0.0 上传对端日志，异步处理
+alt online_class_business_type（在线课求助）
+livesvc -> livesvc: select student_ids / teacher_id from t_livecloud_sub_lesson_v2
+create liveroutersvc
+livesvc -> liveroutersvc: /liveroutersvc/api/pi/v1/system_cmd/user_upload_log
+end
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+title 授课端本地上传
+participant 授课端
+participant "cos/oss" AS oss
+participant imgsvc
+participant livesvc
+note right 授课端
+点击<b>打开</b>时，校验是否课前，并给出可添加图片数量
+剩余数量 = LiveConsole:live_order_course_bind_image_maximum - 已选学生图片数 - 已绑老师图片数
+end note
+授课端 -> liveteachingsvc: <color #green>（wiki:288327192 PT 学习资料图片上传检查）\n<color #green>/{h5|}pt/v1/study_material/image_upload_check</color>（入参qingqing_live_order_course_id）
+授课端 -> livesvc: （<color #red>PT</color> V3 wiki:185074611 多地址文件上传前获取签名）\n/{h5|}pt/v3/image/object_upload_auth
+create oss
+授课端 -> oss: 上传图片
+授课端 -> imgsvc: /pb/v1/media/add/image（wiki:11574780）
+授课端 -> liveteachingsvc: <color #green>（wiki:288327294 PT 学习资料图片批量绑定课程）\n<color #green>/{h5|}pt/v1/study_material/images_bind_course</color>（入参qingqing_live_order_course_id）
+liveteachingsvc -[#blue]> liveteachingsvc: insert t_general_file\n\t t_live_order_course_general_file
+liveteachingsvc --> 授课端: mqtt sendSignal subCmdType:20（老师上传图片完成）
+@enduml

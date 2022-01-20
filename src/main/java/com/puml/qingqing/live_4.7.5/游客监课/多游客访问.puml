@@ -1,0 +1,55 @@
+@startuml
+Actor C as "client" order 1
+participant A as "tcs" order 2
+participant S as "livesvc" order 3
+participant R as "liverouter" order 4
+participant G as "livingcenter" order 5
+
+title: tcs-多游客访问
+
+== 游客key初始化 ==
+C -> A : 点击复制游客链接接口
+activate A
+A -> S : <font color=red>携带用户信息</font>代理调用 apply_token 接口获取游客【key】
+activate S
+note right S
+    生成的【key】记录到 t_live_visit_token_apply_log 这个表中
+end note
+S --> A : 返回key
+deactivate S
+A --> C : 返回key
+deactivate A
+
+== 根据key获取白板连接地址 ==
+C -> R : 根据【key】获取client_id和 白板的url(query_broker_info接口)
+activate R
+R -> S : <font color=red>根据【key】初始化/获取用户信息 （validate_token）</font>
+activate S
+note right S
+    根据key初始化visitor_id，记录到t_live_order_course_visit_log表中并保存到redis
+    <font color=red>t_live_order_course_visit_log 还需要记录用户的真实信息</font>
+end note
+S --> R: 返回游客用户信息
+deactivate S
+R --> C : 根据用户信息返回白板链接地址
+deactivate R
+
+== 根据key获取监课流信息 ==
+C -> G :通过【key】获取监课信息（communication_authinfo_by_token）
+activate G
+G -> S : <font color=red>根据【key】初始化/获取用户信息 （validate_token）</font>
+activate S
+S --> G : 返回游客用户信息
+deactivate S
+G --> C: 根据用户信息返回监课流信息
+deactivate G
+
+== 根据key获取用户真实信息 ==
+C -> S: 根据key获取用户真实信息
+activate S
+note right S
+    从t_live_order_course_visit_log 表中获取
+end note
+S --> C :返回用户的真实类型、昵称
+deactivate S
+@enduml

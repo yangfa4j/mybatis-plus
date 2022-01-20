@@ -1,0 +1,39 @@
+@startuml
+==先切dew zk集群再切des==
+apollo -> dew: zkCluster1 -> zkCluster2
+dew -> zkCluster1: destroy client1 需要disconnect\n<color red>(实际未关闭client，所以会出现zkCluster1连接未断开，误以为zk切换失败，实际同时连接了两个集群)</color>
+zkCluster1 -> des: watchOnPathRemove
+des -[#blue]> des: update t_encode_server is_online=0
+dew -> zkCluster2: connect zkCluster2
+dew -> des: register(createOrUpdate server_type_dew_ip_username on <color red><b>zkCluster1</b></color>, value: server_id)
+des -[#blue]> des: <color red>update</color> t_encode_server is_online=1
+des --> dew: return watchPath: server_type_dew_ip_username
+dew -> zkCluster2: watchChildren: server_type_dew_ip_username（监听子节点事件）（此时dew监听的与des注册的任务节点并不一致，无法正常接收任务通知）
+note right dew: <color red>（此时若从未在ZkCluster2上创建过该path(永久节点), 注册监听事件时会创建该父节点，值为空！！）
+||20||
+apollo -> des: zkCluster1 -> zkCluster2
+des -> zkCluster1: destroy client1<color red>（正常关闭连接）
+des -> zkCluster2: connect zkCluster2
+note right dew
+<b>后续再触发dew register des时由于Integer.valueOf(空值)报QingQingRuntimeException 500错误
+<b>之后dew while true循环重试register，相同server_tag不断报403错误
+<b>dew也无法监听server_type_dew_ip_username子节点事件获取任务
+end note
+
+
+||40||
+==先切des zk集群再切dew\n（不会出现dew register异常情况）==
+apollo -> des: zkCluster1 -> zkCluster2
+des -> zkCluster1: destroy client1<color red>（正常关闭连接）
+des -> zkCluster2: connect zkCluster2
+apollo -> dew: zkCluster1 -> zkCluster2
+dew -> zkCluster1: destroy client1 需要disconnect\n<color red>(实际未关闭client，所以会出现zkCluster1连接未断开，误以为zk切换失败，实际同时连接了两个集群)</color>
+note right dew: 此时由于des已经切到zkCluster2，未能监听到pathRemove，需要等到每日 02:00:00定时任务扫描原有机器后 update t_encode_server is_online=0
+dew -> zkCluster2: connect zkCluster2
+dew -> des: register(createOrUpdate server_type_dew_ip_username on <color red><b>zkCluster2</b></color>, value: server_id)
+des -[#blue]> des: <color red>insert</color> t_encode_server is_online=1
+des --> dew: return watchPath: server_type_dew_ip_username
+dew -> zkCluster2: watchChildren: server_type_dew_ip_username（监听子节点事件）（之后可正常监听到任务到来并执行转码）
+note right dew: <color red>（上一步register时在zkCluster2上已创建好该path和值）
+
+@enduml

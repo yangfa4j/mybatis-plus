@@ -1,0 +1,79 @@
+@startuml
+title 缓存动态课件时序图
+autonumber
+participant coursewaresvc
+participant liveresourcesvc
+participant livedessvc
+database 数据库 as db
+queue redis_db as queue
+participant liveuploader
+participant imagesvc
+participant playsvc
+participant 阿里云 as oss
+participant 腾讯云 as cos
+
+
+coursewaresvc -> coursewaresvc:保存动态课件时,触发迁移动态课件的异步事件
+activate coursewaresvc
+coursewaresvc -> liveresourcesvc:PI 创建资源迁移任务 wiki:297894539
+deactivate coursewaresvc
+note right:本次新增 resource_media_sub_type
+activate liveresourcesvc
+liveresourcesvc -> db:插入 t_resource_upload_summary
+liveresourcesvc -> livedessvc: PI 创建资源迁移任务 wiki:297895344
+deactivate liveresourcesvc
+liveresourcesvc->liveresourcesvc: 定时任务重试逻辑
+activate livedessvc
+livedessvc -> db:插入 t_resource_upload_task
+note left:本次新增 resource_media_sub_type
+livedessvc -> queue:区分 resource_media_sub_type，进入不同的任务队列
+deactivate livedessvc
+livedessvc->livedessvc:定时任务重试逻辑
+alt 动态课件迁移任务
+activate liveuploader
+liveuploader -> livedessvc:长跑线程获取任务 wiki:16123113
+livedessvc -> queue: 获取任务
+queue -> liveuploader:返回任务
+liveuploader -> liveresourcesvc: PI 获取动态课件预览地址V2（从教研云获取） wiki:
+liveresourcesvc -> liveuploader: 返回课件预览地址
+activate liveuploader
+liveuploader -> imagesvc: 根据预览地址，解析课件json
+liveuploader -> oss: 上传文件到oss
+liveuploader -> oss: 上传zip包
+oss-> liveuploader: return storage_ref_id
+liveuploader -> imagesvc: SPB 新建folder,SPB 新增文件 wiki:4792344
+deactivate liveuploader
+imagesvc -> db: 插入 t_folder（media_meta 存压缩包的media_id，entry_point 存 后续路径）、t_object_storage_folder（阿里云记录和相对访问路径）
+imagesvc -> db: 插入 t_file (zip包)
+imagesvc -> liveuploader:返回 folder 的 media_id，zip 的 media_id
+liveuploader -> livedessvc:动态课件迁移任务处理完成回调des
+deactivate liveuploader
+end
+activate livedessvc
+livedessvc->db:修改 t_resource_upload_task,记录 folder 的 media_id,zip 的 media_id
+livedessvc->db:插入 qq_encoder.t_resource_sync_task（迁移课件同步任务表），记录 zip 的 media_id,status 初始态 init
+livedessvc->queue:进入课件迁移同步任务队列
+livedessvc->liveresourcesvc:PI 动态课件迁移任务处理完成回调
+deactivate livedessvc
+activate liveresourcesvc
+liveresourcesvc->db:更新 t_resource_upload_summary 任务状态
+liveresourcesvc->db:更新 t_resource_upload_result 记录 folder 的 media_id,zip 的 media_id
+deactivate liveresourcesvc
+
+alt 动态课件迁移同步任务
+activate liveuploader
+liveuploader -> livedessvc:长跑线程获取任务 wiki:16123113，迁移课件同步任务，修改qq_encoder.t_resource_sync_task（同步任务表）的状态为 uploading
+livedessvc -> queue: 返回任务
+liveuploader -> playsvc: 通过media_id 获取 zip 下载路径
+playsvc -> liveuploader:返回 zip 地址
+liveuploader -> liveuploader:解压并上传到腾讯云
+liveuploader -> cos: 上传腾讯云
+liveuploader -> imagesvc: SPB 支持同步 folder 到其他公有云
+cos -> imagesvc: return storage_ref_id
+imagesvc -> db: 插入 t_object_storage_folder（腾讯云记录和相对访问路径）
+liveuploader -> livedessvc: 同步任务完成回调
+livedessvc -> db: 更新 qq_encoder.t_resource_sync_task（同步任务表）的状态 finish
+deactivate liveuploader
+end
+@enduml
+

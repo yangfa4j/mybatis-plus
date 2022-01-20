@@ -1,0 +1,26 @@
+
+@startuml
+title 课件内容去重流程图
+start
+:paper_id,element_id;
+if(quiz库中有paper_id+element_id记录) then (是)
+   : 直接返回quiz_id + uniq_quiz_id;
+   end
+else(否)
+    :获取paper中试题详情;
+    :去除element_id计算md5;
+    if(quiz库中有md5_without_element_id记录) then (是)
+        : 1. 插入paper_id, element_id, quiz_id记录
+          2. 建立 quiz_id 和 uniq_quiz_id联系
+          3. 触发异步上传quiz_id内容到公有云任务;
+        : 返回quiz_id + uniq_quiz_id;
+        end
+    else(否)
+        : 1. 插入md5_without_element_id, uniq_quiz_id记录
+          2. 插入paper_id, element_id, quiz_id记录
+          3. 建立 quiz_id 和 uniq_quiz_id联系
+          4. 触发异步上传quiz_id内容到公有云任务;
+        : 返回quiz_id + uniq_quiz_id;
+    end
+endif
+@enduml
