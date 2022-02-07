@@ -1,9 +1,0 @@
-@startuml
-autonumber
-H5 -> Livesvc: 创建教研云动态课件接口
-note right: 入参:课件名：新课件+时间
-Livesvc -> Livesvc: 向 reference 表中插一条记录,status = init
-Livesvc --> Livesvc: xxxxx
-Alice -> Bob: yyyyyyyyyyt
-Alice <- Bob: another authentication Response
-@enduml
