@@ -6,6 +6,8 @@ package com.leetcode.SwordToOffer;
  * @Description
  */
 
+import com.leetcode.SwordToOffer.common.ListNode;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;

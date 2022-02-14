@@ -1,4 +1,4 @@
-package com.leetcode.SwordToOffer;
+package com.leetcode.SwordToOffer.common;
 
 import java.util.ArrayList;
 
@@ -9,8 +9,8 @@ import java.util.ArrayList;
  */
 public class ListNode {
 
-    int val;
-    ListNode next;
+    public int val;
+    public ListNode next;
 
     ListNode() {
     }

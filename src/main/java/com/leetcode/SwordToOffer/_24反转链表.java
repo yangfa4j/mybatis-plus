@@ -1,5 +1,7 @@
 package com.leetcode.SwordToOffer;
 
+import com.leetcode.SwordToOffer.common.ListNode;
+
 /**
  * @Date 2022/2/7
  * @Author yangfa
