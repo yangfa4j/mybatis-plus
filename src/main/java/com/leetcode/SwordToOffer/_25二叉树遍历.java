@@ -2,6 +2,7 @@ package com.leetcode.SwordToOffer;
 
 import com.leetcode.SwordToOffer.common.HeroNode;
 
+import java.net.URLEncoder;
 import java.util.Objects;
 
 /**
@@ -12,15 +13,8 @@ import java.util.Objects;
 public class _25二叉树遍历 {
 
     public static void main(String[] args) {
-        HeroNode heroNode = HeroNode.init();
-        System.out.println("先序遍历结果");
-        _25二叉树遍历.preOrder(heroNode);
 
-        System.out.println("中序遍历结果");
-        _25二叉树遍历.midOrder(heroNode);
-
-        System.out.println("后序遍历结果");
-        _25二叉树遍历.afterOrder(heroNode);
+        URLEncoder.encode()
 
     }
 

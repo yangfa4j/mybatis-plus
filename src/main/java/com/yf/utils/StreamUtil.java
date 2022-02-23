@@ -1,4 +1,4 @@
-package com.yf;
+package com.yf.utils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
