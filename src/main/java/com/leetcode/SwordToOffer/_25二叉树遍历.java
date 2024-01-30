@@ -2,7 +2,6 @@ package com.leetcode.SwordToOffer;
 
 import com.leetcode.SwordToOffer.common.HeroNode;
 
-import java.net.URLEncoder;
 import java.util.Objects;
 
 /**
@@ -14,7 +13,7 @@ public class _25二叉树遍历 {
 
     public static void main(String[] args) {
 
-        URLEncoder.encode()
+//        URLEncoder.encode()；
 
     }
 
