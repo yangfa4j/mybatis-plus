@@ -2,7 +2,7 @@ package com.leetcode;
 
 public class ListNode {
     int val;
-    com.example.demo.leetcode.ListNode next;
+    ListNode next;
 
     ListNode() {
     }
@@ -11,7 +11,7 @@ public class ListNode {
         this.val = val;
     }
 
-    ListNode(int val, com.example.demo.leetcode.ListNode next) {
+    ListNode(int val, ListNode next) {
         this.val = val;
         this.next = next;
     }
