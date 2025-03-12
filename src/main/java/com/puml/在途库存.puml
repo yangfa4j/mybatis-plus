@@ -1,0 +1,23 @@
+@startuml
+start
+:配销单完成支付并发起出库;
+:记录在途库存;
+:<color:#00FF00>ADD_IN_INTRANSIT_STOCK;
+
+fork
+    :出库成功;
+    :<color:#FF0000>DEDUCT_INTRANSIT_STOCK;
+    :释放在途库存;
+fork again
+    :oms 回调;
+    :<color:#FF0000>DEDUCT_INTRANSIT_STOCK;
+    :释放在途库存;
+fork again
+    :配销单作废;
+    :出库中的状态;
+    :<color:#FF0000>DEDUCT_INTRANSIT_STOCK;
+    :释放在途库存;
+endfork
+
+stop
+@enduml

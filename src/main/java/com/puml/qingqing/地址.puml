@@ -1,0 +1,39 @@
+@startuml
+' 设置全局样式
+skinparam backgroundColor #EEEEFF
+skinparam sequence {
+    ArrowColor DeepSkyBlue
+    LifeLineBorderColor DeepSkyBlue
+    LifeLineBackgroundColor #A9DCDF
+}
+skinparam component {
+    BackgroundColor #E5F6FF
+    BorderColor DeepSkyBlue
+}
+skinparam database {
+    BackgroundColor #E5F6FF
+    BorderColor DeepSkyBlue
+}
+
+' 定义参与者
+actor User as U
+note right of U: 系统使用者，可录入和查询信息
+
+' 定义系统组件
+component "应用程序" as App
+note right of App: 处理业务逻辑，包括加密和解密操作
+database "数据库" as DB
+note right of DB: 存储加密后的地址和电话信息
+
+' 录入流程
+U --> App : 录入地址和电话
+App -> App : 调用加密算法加密信息
+App --> DB : 存储加密后的地址和电话信息
+
+' 查询流程
+U --> App : 发起地址和电话查询请求
+DB --> App : 返回存储的加密信息
+App -> App : 调用解密算法解密信息
+App --> U : 显示解密后的地址和电话信息
+
+@enduml

@@ -1,0 +1,64 @@
+```puml
+@startuml
+start
+:判断是仓配还是直配;
+if (仓配?) then (是)
+    :审核状态判断;
+    if (审核通过?) then (是)
+        :退款类型判断;
+        if (仅退款?) then (是)
+            :状态为“已完成”;
+        else (否)
+            :退货退款;
+            if (差异中心?) then (是)
+                :状态为“待收货”;
+            else (否)
+                :状态为“出库中”;
+            endif
+        endif
+    else (否)
+        :审核驳回;
+        if (差异中心?) then (是)
+            :状态为“已关闭”;
+        else (否)
+            :状态为“审批驳回”;
+        endif
+        if (类自营仓配) then (是)
+                            :状态为“审批驳回”;
+        else (否)
+                            :状态为“已关闭”;
+        endif
+        if (去海商灰度&&老仓配) then (是)
+                    :状态为“审批驳回”;
+        else (否)
+                    :状态为“已关闭”;
+        endif
+    endif
+else (否)
+    :直配;
+    :审核状态判断;
+    if (审核通过?) then (是)
+        :退款类型判断;
+        if (仅退款?) then (是)
+            :状态为“已完成”;
+        else (否)
+            :退货退款;
+            if (差异中心?) then (是)
+                :状态为“待收货”;
+            else (否)
+                :状态为“出库中”;
+            endif
+        endif
+    else (否)
+        :审核驳回;
+        if (差异中心?) then (是)
+            :状态为“已关闭”;
+        else (否)
+            :状态为“已驳回”;
+        endif
+    endif
+endif
+stop
+@enduml
+
+```
