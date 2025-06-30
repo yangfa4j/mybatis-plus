@@ -1,0 +1,52 @@
+@startuml
+
+autonumber
+
+purchase -> purchase: 初始化用户信息
+note left: 创建 UserKey 对象，包含用户的账号 ID、用户名、员工 ID 等信息，用于后续的下单操作。
+purchase -> purchase: 获取1688下单留言信息，获取的是租户配置
+purchase -> purchase: 查询采购单列表
+purchase -> purchase: 查询账号授权信息(只查1688)
+note left: 采购单扩展字段中的alibabaAccount与alibabaAccountAppKey，只有 1688的单子才有。
+purchase -> purchase: 循环对每一个采购单进行 <color:#FF0000> createPurchaseOrder 预下单
+purchase -> purchase: 渠道和状态不符合条件，直接构建失败结果，且不更新数据
+note left: 不是渠道单或者采购单非待下单状态都是不符合条件
+purchase -> purchase: 加载这个采购单的商品详细信息
+purchase -> purchase: 获取渠道商品信息scmSupplierGoodsAppService.queryUpSelfChannelGoodsList(channelGoodsIdList);
+note left: 渠道商品 id 存在采购单扩展字段中的 scmChannelGoodsId
+purchase -> purchase: 校验系统维护开关、校验状态、校验库存
+purchase -> purchase: 构建预下单 dto
+purchase -> purchase: 收货地址根据开关，使用门店地址或者自定义网采地址
+note left: 已经全量优先用自定义网采地址，没有则使用门店地址，而地址的使用，分为明文密文，目前这个开关还在灰度中，其中手机号、详细地址使用KMS加密
+purchase -> mppurchase: 预下单，mpPurchaseOrderService: ScmChannelOrderCmdThriftService.preSubmit 方法
+mppurchase -> mppurchase: dto 转换，注意这里没有对手机号，和详细地址解密，仍然用的密文
+mppurchase -> channel:ScmChannelGatewayOrderThriftService.preSubmit 方法
+channel -> channel: dto 转换,对参数中的手机号、详细地址使用 KMS 解密拿到明文
+note left: 注意这里对手机号、详细地址使用 KMS 解密拿到明文
+channel -> hiMALL: hiMallOrderGateway.preOrder(req); http 调用海商预下单接口下单
+hiMALL -> channel: 返回预下单结果
+channel -> mppurchase: 返回预下单结果
+mppurchase -> purchase: 获取预下单结果
+purchase -> purchase: 判断是 1688 或者是 闪电仓进行下单
+purchase -> purchase: 修改单据为处理中，构造下单 dto
+purchase -> mppurchase: 调用下单接口，ScmChannelOrderCmdThriftService.submit 方法
+mppurchase -> mppurchase: dto 转换,生成 leaf CSO+ 渠道订单号
+mppurchase -> channel: dto 转换， ScmChannelGatewayOrderThriftService.submit 方法
+channel -> channel: dto 转换,对参数中的手机号、详细地址使用 KMS 解密拿到明文
+note left: 注意这里对手机号、详细地址使用 KMS 解密拿到明文
+channel -> hiMALL: hiMallOrderGateway.confirmOrder(req); http 调用海商下单接口下单
+hiMALL -> channel: 返回下单结果
+channel -> mppurchase: 返回下单结果
+mppurchase -> purchase: 获取下单结果
+purchase -> purchase: 组装结果，返回 excle
+
+
+
+
+
+
+
+
+
+
+@enduml
