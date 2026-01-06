@@ -1,0 +1,30 @@
+server:
+  port: 8080
+  context-path: /
+
+env:
+  type: tst
+
+spring:
+  application:
+    name: service
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: [ 'prometheus','health' ]
+        exclude: [ 'shutdown' ]
+      base-path: /service-monitor
+  endpoint:
+    refresh:
+      enabled: false
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        descriptions: true
+        enabled: true
+        step: 1m
