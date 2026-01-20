@@ -1,30 +1,30 @@
 server:
   port: 8080
-  context-path: /
+
 
 env:
   type: tst
 
 spring:
   application:
-    name: service
+    name: mybatis-plus
 
 
 management:
   endpoints:
     web:
       exposure:
-        include: [ 'prometheus','health' ]
-        exclude: [ 'shutdown' ]
-      base-path: /service-monitor
+          include: health,info,prometheus,metrics,mappings
+      base-path: /actuator
+  # 开启 prometheus 端点
   endpoint:
-    refresh:
-      enabled: false
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
   metrics:
     tags:
-      application: ${spring.application.name}
+      application: ${spring.application.name} #  Prometheus 指标tag
     export:
       prometheus:
-        descriptions: true
-        enabled: true
-        step: 1m
+          enabled: true # 启用 Prometheus 指标导出
